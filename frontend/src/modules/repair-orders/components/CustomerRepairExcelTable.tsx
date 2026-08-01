@@ -384,8 +384,17 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                             className="fixed top-4 left-4 z-[30000] text-amber-300 hover:text-white bg-black/80 hover:bg-black/95 border border-amber-500/40 px-3 py-1.5 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-1.5 cursor-pointer pointer-events-auto transition-all text-xs font-bold select-none"
                             title="Thêm ảnh trước mới"
                           >
-                            <PlusOutlined className="text-sm text-amber-400" />
-                            <span>Thêm ảnh</span>
+                            {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "before" ? (
+                              <>
+                                <Spin size="small" />
+                                <span>Đang tải...</span>
+                              </>
+                            ) : (
+                              <>
+                                <PlusOutlined className="text-sm text-amber-400" />
+                                <span>Thêm ảnh</span>
+                              </>
+                            )}
                             <input
                               type="file"
                               accept="image/*"
@@ -433,9 +442,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                   {beforeImages.map((img, imgIdx) => (
                     <div
                       key={getRepairImageReference(img) || imgIdx}
+                      onClick={() => setBeforePreviewState({ visible: true, current: 0 })}
                       className={
                         imgIdx === 0
-                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-white dark:bg-gray-800 shrink-0"
+                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
                           : "hidden"
                       }
                     >
@@ -443,8 +453,19 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                         src={resolveRepairImageUrl(img)}
                         alt="Trước"
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        placeholder={
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                            <Spin size="small" />
+                          </div>
+                        }
+                        wrapperClassName="!w-full !h-full !block overflow-hidden"
+                        className="!w-full !h-full !object-cover cursor-pointer"
                       />
+                      {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "before" && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20 rounded-md">
+                          <Spin size="small" />
+                        </div>
+                      )}
                       {imgIdx === 0 && beforeImages.length > 1 && (
                         <span className="absolute bottom-0 right-0 bg-amber-600/95 text-white text-[9px] font-extrabold px-1 rounded-tl shadow-sm pointer-events-none z-10">
                           +{beforeImages.length - 1}
@@ -496,8 +517,17 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                             className="fixed top-4 left-4 z-[30000] text-emerald-300 hover:text-white bg-black/80 hover:bg-black/95 border border-emerald-500/40 px-3 py-1.5 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-1.5 cursor-pointer pointer-events-auto transition-all text-xs font-bold select-none"
                             title="Thêm ảnh sau mới"
                           >
-                            <PlusOutlined className="text-sm text-emerald-400" />
-                            <span>Thêm ảnh</span>
+                            {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "after" ? (
+                              <>
+                                <Spin size="small" />
+                                <span>Đang tải...</span>
+                              </>
+                            ) : (
+                              <>
+                                <PlusOutlined className="text-sm text-emerald-400" />
+                                <span>Thêm ảnh</span>
+                              </>
+                            )}
                             <input
                               type="file"
                               accept="image/*"
@@ -545,9 +575,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                   {afterImages.map((img, imgIdx) => (
                     <div
                       key={getRepairImageReference(img) || imgIdx}
+                      onClick={() => setAfterPreviewState({ visible: true, current: 0 })}
                       className={
                         imgIdx === 0
-                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border-2 border-emerald-500 dark:border-emerald-600 shadow-sm relative group/img bg-white dark:bg-gray-800 shrink-0"
+                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border-2 border-emerald-500 dark:border-emerald-600 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
                           : "hidden"
                       }
                     >
@@ -555,8 +586,19 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                         src={resolveRepairImageUrl(img)}
                         alt="Sau"
                         loading="lazy"
-                        className="w-full h-full object-cover"
+                        placeholder={
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                            <Spin size="small" />
+                          </div>
+                        }
+                        wrapperClassName="!w-full !h-full !block overflow-hidden"
+                        className="!w-full !h-full !object-cover cursor-pointer"
                       />
+                      {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "after" && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20 rounded-md">
+                          <Spin size="small" />
+                        </div>
+                      )}
                       {imgIdx === 0 && afterImages.length > 1 && (
                         <span className="absolute bottom-0 right-0 bg-emerald-700/95 text-white text-[9px] font-extrabold px-1 rounded-tl shadow-sm pointer-events-none z-10">
                           +{afterImages.length - 1}
