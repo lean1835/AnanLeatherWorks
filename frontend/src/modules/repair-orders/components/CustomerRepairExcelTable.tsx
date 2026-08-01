@@ -886,8 +886,8 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     const [isSaving, setIsSaving] = useState(false);
     const [zoomLevel, setZoomLevel] = useState<number>(() => {
       if (typeof window !== "undefined") {
-        if (window.innerWidth < 380) return 65;
-        if (window.innerWidth < 480) return 70;
+        if (window.innerWidth < 380) return 35;
+        if (window.innerWidth < 480) return 35;
         if (window.innerWidth < 768) return 85;
       }
       return 100;
