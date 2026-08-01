@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#F9FAFB] text-[#111827] antialiased selection:bg-[#1F2937] selection:text-white dark:bg-[#111827] dark:text-gray-100;
+    font-family:
+      "Be Vietnam Pro",
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-serif,
+  .font-serif-headline {
+    font-family: "Be Vietnam Pro", "Inter", system-ui, sans-serif !important;
+    font-weight: 700;
+    color: #111827;
+  }
+}
+
+/* Custom Leather Gradients & Tones */
+.bg-gradient-leather {
+  background: linear-gradient(135deg, #6f4627 0%, #8b5e3c 100%);
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+.bg-gradient-green {
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+}
+.bg-gradient-purple {
+  background: linear-gradient(135deg, #6f4627 0%, #8b5e3c 100%);
+}
+.bg-gradient-red {
+  background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%);
+}
+
+@keyframes accordionSlideDown {
+  0% {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-20px) scaleY(0.92);
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    max-height: 600px;
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+.animate-accordion-down {
+  animation: accordionSlideDown 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: max-height, opacity, transform;
+}
+
+.pdf-btn-rose.ant-btn-primary {
+  background-color: #e11d48 !important;
+  border-color: #e11d48 !important;
+  color: #ffffff !important;
+}
+
+.pdf-btn-rose.ant-btn-primary:hover,
+.pdf-btn-rose.ant-btn-primary:focus,
+.pdf-btn-rose.ant-btn-primary:active {
+  background-color: #be123c !important;
+  border-color: #be123c !important;
+  color: #ffffff !important;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.85);
+}
+.dark .glass-card {
+  background: rgba(35, 39, 54, 0.85);
+}
+
+/* Premium AntD Table overrides */
+.custom-table .ant-table {
+  background: transparent !important;
+}
+.custom-table .ant-table-thead > tr > th {
+  background: #f4f3f3 !important;
+  color: #51443c !important;
+  font-weight: 700 !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid #d5c3b8 !important;
+}
+.dark .custom-table .ant-table-thead > tr > th {
+  background: #232736 !important;
+  color: #9ca3af !important;
+  border-bottom: 1px solid #374151 !important;
+}
+.custom-table .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #e8e8e8 !important;
+  padding: 14px 16px !important;
+}
+.dark .custom-table .ant-table-tbody > tr > td {
+  border-bottom: 1px solid #2d3243 !important;
+  color: #e5e7eb !important;
+}
+.custom-table .ant-table-tbody > tr:hover > td {
+  background: #f4f3f3 !important;
+}
+.dark .custom-table .ant-table-tbody > tr:hover > td {
+  background: #2a2f42 !important;
+}
+
+/* Ant Design Primary Color Overrides */
+.ant-btn-primary {
+  background-color: #8b5e3c !important;
+  border-color: #8b5e3c !important;
+}
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: #6f4627 !important;
+  border-color: #6f4627 !important;
+}
+
+/* Premium Notification */
+.premium-notification {
+  border-radius: 16px !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ant Design Mobile DatePicker Responsive Overrides */
+@media (max-width: 640px) {
+  .ant-picker-dropdown {
+    max-width: calc(100vw - 20px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+  .ant-picker-dropdown .ant-picker-panel-container {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2) !important;
+  }
+  .ant-picker-dropdown .ant-picker-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .ant-picker-dropdown .ant-picker-date-panel {
+    width: 100% !important;
+  }
+  .ant-picker-dropdown .ant-picker-content {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+  .ant-picker-dropdown .ant-picker-content th,
+  .ant-picker-dropdown .ant-picker-content td {
+    padding: 2px 0 !important;
+  }
+  .ant-picker-dropdown .ant-picker-cell-inner {
+    min-width: 26px !important;
+    height: 26px !important;
+    line-height: 26px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+  }
+  .ant-picker-dropdown .ant-picker-header {
+    padding: 4px 6px !important;
+  }
+  .ant-picker-dropdown .ant-picker-header-view button {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+  .ant-picker-dropdown .ant-picker-footer {
+    padding: 4px 8px !important;
+  }
+}

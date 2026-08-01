@@ -1,0 +1,54 @@
+{
+  "name": "ananleather-works-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "npm@10.9.7",
+  "engines": {
+    "node": ">=22.22 <25",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "dev": "vite",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "eslint \"src/**/*.{ts,tsx}\"",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "node --test test/critical-contracts.test.mjs",
+    "audit:prod": "node scripts/audit-production.mjs",
+    "build": "npm run clean && npm run typecheck && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,scss}\" \"test/**/*.mjs\" \"scripts/**/*.mjs\" \"*.{js,json,ts}\" .prettierrc",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,scss}\" \"test/**/*.mjs\" \"scripts/**/*.mjs\" \"*.{js,json,ts}\" .prettierrc",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "@reduxjs/toolkit": "^2.5.1",
+    "antd": "^5.24.0",
+    "dayjs": "1.11.21",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "7.18.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.8.0",
+    "postcss": "^8.5.2",
+    "prettier": "^3.5.1",
+    "rimraf": "^6.1.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.7.3",
+    "typescript-eslint": "^8.65.0",
+    "vite": "^6.1.0"
+  }
+}
