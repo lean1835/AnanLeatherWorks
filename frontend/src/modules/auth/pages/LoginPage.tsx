@@ -90,7 +90,7 @@ export const LoginPage: React.FC = () => {
         </Form>
 
         <div className="mt-8 text-center text-xs text-on-surface-variant border-t border-outline-variant dark:border-gray-800 pt-4">
-          Hệ thống bảo mật nội bộ dành cho nhân viên AnanLeather Works.
+          Hệ thống bảo mật nội bộ dành cho nhân viên AnanLeather.
         </div>
       </div>
     </div>
