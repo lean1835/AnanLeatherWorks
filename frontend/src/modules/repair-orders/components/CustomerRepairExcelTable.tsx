@@ -670,7 +670,14 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
 
           <td className="p-0 text-center align-middle whitespace-nowrap w-7 min-w-[26px] max-w-[26px]">
             <div className="flex items-center justify-center">
-              <Popconfirm title="Xóa dòng này?" onConfirm={() => handleDeleteRow(idx)} okText="Xóa" cancelText="Hủy">
+              <Popconfirm
+                title="Xóa dòng này?"
+                onConfirm={() => handleDeleteRow(idx)}
+                okText="Xóa"
+                cancelText="Hủy"
+                placement="topLeft"
+                getPopupContainer={(triggerNode) => triggerNode.closest(".origin-top-left") || document.body}
+              >
                 <button
                   type="button"
                   className="w-6 h-6 flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-100/80 dark:hover:bg-red-950/70 rounded transition-all border-none bg-transparent cursor-pointer p-0"
