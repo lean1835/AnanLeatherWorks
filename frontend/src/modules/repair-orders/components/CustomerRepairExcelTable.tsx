@@ -686,9 +686,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                           bordered={false}
                           placement="bottomLeft"
                           showSearch={false}
-                          popupMatchSelectWidth={130}
+                          popupMatchSelectWidth={false}
+                          dropdownStyle={{ minWidth: 145, zIndex: 99999 }}
                           disabled={!canUpdate}
-                          getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
+                          getPopupContainer={(triggerNode) => triggerNode.closest(".origin-top-left") || document.body}
                           className="w-full text-[10px]"
                           labelRender={({ value }) => {
                             const cfg = STATUS_CONFIG[value as string] || STATUS_CONFIG[ORDER_STATUS.NEW];
@@ -2072,7 +2073,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
               className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-135px)] md:max-h-[calc(100vh-160px)] border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full"
             >
               <div
-                className="origin-top-left min-w-full"
+                className="origin-top-left min-w-full relative"
                 style={{
                   zoom: `${zoomLevel}%`,
                   WebkitTransform: `scale(${zoomLevel / 100})`,
