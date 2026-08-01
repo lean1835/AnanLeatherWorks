@@ -620,22 +620,22 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </form>
           </td>
 
-          <td className="w-36 min-w-[130px] p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top">
-            <div className="font-mono text-sm font-extrabold tracking-tight text-warm-ink dark:text-amber-400">
+          <td className="w-24 sm:w-36 min-w-[90px] sm:min-w-[130px] p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top">
+            <div className="font-mono text-xs sm:text-sm font-extrabold tracking-tight text-warm-ink dark:text-amber-400">
               {formatVND(rowTotal)}
             </div>
           </td>
 
-          <td className="p-0 text-center align-middle whitespace-nowrap w-10 min-w-[36px] max-w-[36px]">
+          <td className="p-0 text-center align-middle whitespace-nowrap w-7 min-w-[28px] max-w-[28px]">
             <div className="flex items-center justify-center">
               <Popconfirm title="Xóa dòng này?" onConfirm={() => handleDeleteRow(idx)} okText="Xóa" cancelText="Hủy">
                 <button
                   type="button"
-                  className="w-7 h-7 flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-100/80 dark:hover:bg-red-950/70 rounded transition-all border-none bg-transparent cursor-pointer p-0"
+                  className="w-6 h-6 flex items-center justify-center text-red-600 hover:text-red-700 hover:bg-red-100/80 dark:hover:bg-red-950/70 rounded transition-all border-none bg-transparent cursor-pointer p-0"
                   title="Xóa dòng này"
                   disabled={!canDelete}
                 >
-                  <DeleteOutlined className="text-sm text-red-600" />
+                  <DeleteOutlined className="text-xs text-red-600" />
                 </button>
               </Popconfirm>
             </div>
@@ -886,8 +886,9 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     const [isSaving, setIsSaving] = useState(false);
     const [zoomLevel, setZoomLevel] = useState<number>(() => {
       if (typeof window !== "undefined") {
-        if (window.innerWidth < 480) return 44;
-        if (window.innerWidth < 768) return 44;
+        if (window.innerWidth < 380) return 46;
+        if (window.innerWidth < 480) return 48;
+        if (window.innerWidth < 768) return 75;
       }
       return 100;
     });
@@ -2075,24 +2076,24 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                   <thead className="sticky top-0 z-20 bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
                     <tr className="select-none uppercase tracking-wider text-xs font-black whitespace-nowrap align-top">
                       <th
-                        className="sticky left-0 top-0 z-30 w-12 min-w-[48px] whitespace-nowrap border-r border-borderLeather bg-primary-header px-1.5 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink shadow-sm dark:border-gray-700 dark:bg-surface-dark-muted dark:text-amber-300"
+                        className="sticky left-0 top-0 z-30 w-9 min-w-[32px] whitespace-nowrap border-r border-borderLeather bg-primary-header px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink shadow-sm dark:border-gray-700 dark:bg-surface-dark-muted dark:text-amber-300"
                         title="Nhấn vào ô STT để xem chi tiết"
                       >
                         STT ▾
                       </th>
-                      <th className="w-80 min-w-[240px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-40 sm:w-80 min-w-[130px] sm:min-w-[240px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         <div className="font-black text-xs leading-none">TÊN SẢN PHẨM & ẢNH</div>
                         <div className="text-[8px] font-bold text-primary dark:text-amber-400 normal-case tracking-normal leading-tight mt-1">
                           (TRƯỚC / SAU)
                         </div>
                       </th>
-                      <th className="w-auto min-w-[220px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-36 sm:w-auto min-w-[115px] sm:min-w-[220px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         YÊU CẦU SỬA CHỮA
                       </th>
-                      <th className="w-36 min-w-[130px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-right align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-24 sm:w-36 min-w-[90px] sm:min-w-[130px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-right align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         TỔNG TIỀN
                       </th>
-                      <th className="p-0 text-center whitespace-nowrap font-black text-primary-ink dark:text-amber-300 text-xs align-top w-10 min-w-[36px] max-w-[36px]"></th>
+                      <th className="p-0 text-center whitespace-nowrap font-black text-primary-ink dark:text-amber-300 text-xs align-top w-7 min-w-[28px] max-w-[28px]"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -2130,10 +2131,10 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                       >
                         TỔNG CỘNG:
                       </td>
-                      <td className="w-36 min-w-[130px] whitespace-nowrap p-2 text-right font-mono text-sm font-black text-warm-ink dark:text-amber-400">
+                      <td className="w-24 sm:w-36 min-w-[90px] sm:min-w-[130px] whitespace-nowrap p-2 text-right font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400">
                         {formatVND(grandTotal)}
                       </td>
-                      <td colSpan={1} className="p-0 w-10 min-w-[36px] max-w-[36px]"></td>
+                      <td colSpan={1} className="p-0 w-7 min-w-[28px] max-w-[28px]"></td>
                     </tr>
                   </tfoot>
                 </table>
