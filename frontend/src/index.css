@@ -189,20 +189,21 @@
   }
 }
 
-/* Prevent mobile browser auto-zoom on input focus */
+/* Prevent mobile browser auto-zoom on input focus for page & modal forms */
 @media (max-width: 768px) {
-  input[type="text"],
-  input[type="password"],
-  input[type="number"],
-  input[type="search"],
-  input[type="email"],
-  input[type="tel"],
-  textarea,
-  select,
-  .ant-input,
+  .ant-modal input,
+  .ant-form input,
+  header input,
   .ant-select-selection-search-input,
   .ant-picker-input > input {
     font-size: 16px !important;
+    touch-action: manipulation;
+  }
+
+  /* Keep Excel table inputs compact on mobile */
+  td input,
+  td textarea {
+    font-size: 12px !important;
     touch-action: manipulation;
   }
 }

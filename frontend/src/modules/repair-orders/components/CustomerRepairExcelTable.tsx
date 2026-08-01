@@ -345,7 +345,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             <div className="flex items-center justify-center gap-2 pt-1">
               {beforeImages.length === 0 ? (
                 <label
-                  className="flex h-14 w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
+                  className="flex h-10 w-10 sm:h-14 sm:w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
                   title="Tải ảnh trước"
                 >
                   {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "before" ? (
@@ -435,7 +435,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       key={getRepairImageReference(img) || imgIdx}
                       className={
                         imgIdx === 0
-                          ? "w-14 h-14 rounded-md overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-white dark:bg-gray-800 shrink-0"
+                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-white dark:bg-gray-800 shrink-0"
                           : "hidden"
                       }
                     >
@@ -457,7 +457,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
 
               {afterImages.length === 0 ? (
                 <label
-                  className="flex h-14 w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-emerald-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
+                  className="flex h-10 w-10 sm:h-14 sm:w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-emerald-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
                   title="Tải ảnh sau"
                 >
                   {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "after" ? (
@@ -547,7 +547,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       key={getRepairImageReference(img) || imgIdx}
                       className={
                         imgIdx === 0
-                          ? "w-14 h-14 rounded-md overflow-hidden border-2 border-emerald-500 dark:border-emerald-600 shadow-sm relative group/img bg-white dark:bg-gray-800 shrink-0"
+                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border-2 border-emerald-500 dark:border-emerald-600 shadow-sm relative group/img bg-white dark:bg-gray-800 shrink-0"
                           : "hidden"
                       }
                     >
@@ -886,8 +886,8 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     const [isSaving, setIsSaving] = useState(false);
     const [zoomLevel, setZoomLevel] = useState<number>(() => {
       if (typeof window !== "undefined") {
-        if (window.innerWidth < 380) return 35;
-        if (window.innerWidth < 480) return 35;
+        if (window.innerWidth < 380) return 65;
+        if (window.innerWidth < 480) return 70;
         if (window.innerWidth < 768) return 85;
       }
       return 100;
@@ -2071,7 +2071,17 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
               ref={tableContainerRef}
               className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-135px)] md:max-h-[calc(100vh-160px)] border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full"
             >
-              <div className="min-w-full origin-top-left" style={{ zoom: `${zoomLevel}%` }}>
+              <div
+                className="origin-top-left min-w-full"
+                style={{
+                  zoom: `${zoomLevel}%`,
+                  WebkitTransform: `scale(${zoomLevel / 100})`,
+                  WebkitTransformOrigin: "0 0",
+                  transform: `scale(${zoomLevel / 100})`,
+                  transformOrigin: "0 0",
+                  width: zoomLevel < 100 ? `${(100 / (zoomLevel / 100)).toFixed(2)}%` : "100%",
+                }}
+              >
                 <table className="w-full text-left text-xs border-collapse min-w-[340px] sm:min-w-[580px]">
                   <thead className="sticky top-0 z-20 bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
                     <tr className="select-none uppercase tracking-wider text-xs font-black whitespace-nowrap align-top">
