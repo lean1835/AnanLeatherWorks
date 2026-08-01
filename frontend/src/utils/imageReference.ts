@@ -36,7 +36,23 @@ export const getRepairImagePreviewStateAfterRemoval = (
 export const resolveRepairImageUrlWithBase = (image: RepairImageInput, apiBaseUrl: string): string => {
   const value = getRepairImageReference(image).trim();
   if (!value) return "";
-  if (/^(blob:|data:|https?:\/\/)/i.test(value) || value.startsWith("/")) return value;
+  if (/^(blob:|data:)/i.test(value)) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+
   const baseUrl = apiBaseUrl.replace(/\/$/, "");
-  return `${baseUrl}/repair-orders/stream/${encodeURIComponent(value)}`;
+  const streamUrl = value.startsWith("/")
+    ? `${baseUrl}${value}`
+    : `${baseUrl}/repair-orders/stream/${encodeURIComponent(value)}`;
+
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("token") || localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken")
+      : null;
+
+  if (token) {
+    const separator = streamUrl.includes("?") ? "&" : "?";
+    return `${streamUrl}${separator}token=${encodeURIComponent(token)}`;
+  }
+
+  return streamUrl;
 };

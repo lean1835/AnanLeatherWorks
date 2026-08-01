@@ -22,6 +22,10 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
             token = req.headers.authorization.split(' ')[1];
         }
 
+        if (!token && typeof req.query.token === 'string' && req.query.token.trim()) {
+            token = req.query.token.trim();
+        }
+
         if (!token) {
             return next(new ApiError(401, 'Vui lòng đăng nhập để thực hiện thao tác này.'));
         }
