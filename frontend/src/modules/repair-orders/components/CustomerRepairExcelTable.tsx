@@ -2097,7 +2097,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                           (TRƯỚC / SAU)
                         </div>
                       </th>
-                      <th className="w-32 sm:w-auto min-w-[110px] sm:min-w-[200px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-auto min-w-[110px] sm:min-w-[200px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         YÊU CẦU SỬA CHỮA
                       </th>
                       <th className="w-20 sm:w-32 min-w-[72px] sm:min-w-[120px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-right align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
