@@ -2071,7 +2071,17 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
               ref={tableContainerRef}
               className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-135px)] md:max-h-[calc(100vh-160px)] border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full"
             >
-              <div className="min-w-full origin-top-left" style={{ zoom: `${zoomLevel}%` }}>
+              <div
+                className="min-w-full origin-top-left"
+                style={{
+                  zoom: `${zoomLevel}%`,
+                  WebkitTransform: `scale(${zoomLevel / 100})`,
+                  WebkitTransformOrigin: "top left",
+                  transform: `scale(${zoomLevel / 100})`,
+                  transformOrigin: "top left",
+                  width: zoomLevel < 100 ? `${(100 / zoomLevel) * 100}%` : "100%",
+                }}
+              >
                 <table className="w-full text-left text-xs border-collapse min-w-[440px] sm:min-w-[580px]">
                   <thead className="sticky top-0 z-20 bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
                     <tr className="select-none uppercase tracking-wider text-xs font-black whitespace-nowrap align-top">
