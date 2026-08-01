@@ -688,7 +688,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                           showSearch={false}
                           popupMatchSelectWidth={130}
                           disabled={!canUpdate}
-                          getPopupContainer={() => document.body}
+                          getPopupContainer={(triggerNode) => triggerNode.parentElement || document.body}
                           className="w-full text-[10px]"
                           labelRender={({ value }) => {
                             const cfg = STATUS_CONFIG[value as string] || STATUS_CONFIG[ORDER_STATUS.NEW];
