@@ -16,7 +16,11 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     try {
         // Accept one legacy unsigned cookie during rollout; newly issued cookies are
         // signed whenever COOKIE_SECRET is configured.
-        const token = req.signedCookies?.token || req.cookies?.token;
+        let token = req.signedCookies?.token || req.cookies?.token;
+
+        if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
 
         if (!token) {
             return next(new ApiError(401, 'Vui lòng đăng nhập để thực hiện thao tác này.'));

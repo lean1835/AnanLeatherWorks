@@ -8,7 +8,7 @@ export const authApi = baseApi.injectEndpoints({
       providesTags: ["Auth"],
     }),
     login: builder.mutation<
-      { success: boolean; message: string; data: { user: User } },
+      { success: boolean; message: string; data: { user: User; token?: string } },
       { username: string; password: string }
     >({
       query: (credentials) => ({

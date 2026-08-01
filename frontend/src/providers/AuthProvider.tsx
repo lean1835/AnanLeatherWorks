@@ -14,7 +14,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const user = meError ? null : meData?.data?.user || null;
 
   const login = async (username: string, password: string) => {
-    await loginTrigger({ username, password }).unwrap();
+    const result = await loginTrigger({ username, password }).unwrap();
+    if (result.data?.token) {
+      localStorage.setItem("token", result.data.token);
+    }
     await refetchMe().unwrap();
   };
 

@@ -5,6 +5,13 @@ import { API_BASE_URL } from "../configs/api";
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   credentials: "include",
+  prepareHeaders: (headers) => {
+    const token = localStorage.getItem("token") || localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+    if (token) {
+      headers.set("authorization", `Bearer ${token}`);
+    }
+    return headers;
+  },
 });
 
 const baseQueryWithReformatting: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (

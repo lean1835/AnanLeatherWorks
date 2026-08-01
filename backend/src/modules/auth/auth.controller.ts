@@ -24,8 +24,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
         recordSuccessfulLogin(ip, username);
 
         res.cookie('token', result.data!.token, authCookieOptions);
-        const { token: _token, ...publicData } = result.data!;
-        res.status(200).json({ ...result, data: publicData });
+        res.status(200).json(result);
     } catch (error) {
         recordFailedLogin(ip, username);
         throw error;
@@ -37,8 +36,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     const result = await authService.register({ username, password, displayName });
 
     res.cookie('token', result.data!.token, authCookieOptions);
-    const { token: _token, ...publicData } = result.data!;
-    res.status(201).json({ ...result, data: publicData });
+    res.status(201).json(result);
 });
 
 export const logout = catchAsync(async (req: Request, res: Response) => {
