@@ -67,7 +67,7 @@ export const Header: React.FC = React.memo(() => {
     <header className="sticky top-0 z-30 bg-surface-container-lowest/90 dark:bg-surface-dark-deep/90 backdrop-blur-md border-b border-outline-variant dark:border-gray-800 px-6 py-3 flex items-center justify-between shadow-sm">
       <div className="flex items-center gap-3">
         <img
-          src="/ananleather_logo.jpg"
+          src="/ananleather_logo.png"
           alt="AnanLeather Works Logo"
           className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-100 dark:border-gray-800"
         />

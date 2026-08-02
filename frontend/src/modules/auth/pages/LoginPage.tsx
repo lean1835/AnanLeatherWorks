@@ -33,7 +33,7 @@ export const LoginPage: React.FC = () => {
       <div className="w-full max-w-[420px] rounded-2xl border border-outline-variant bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-surface-dark-panel sm:p-8 md:p-10">
         <div className="text-center mb-6 sm:mb-8">
           <img
-            src="/ananleather_logo.jpg"
+            src="/ananleather_logo.png"
             alt="AnanLeather Works Logo"
             className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover shadow-md border border-gray-100 dark:border-gray-800"
           />
