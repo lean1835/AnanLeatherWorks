@@ -12,6 +12,7 @@ export const loginSchema = Joi.object({
         'any.required': 'Mật khẩu là bắt buộc',
         'string.max': 'Mật khẩu đăng nhập quá dài',
     }),
+    rememberMe: Joi.boolean().optional(),
 });
 
 export const registerSchema = Joi.object({

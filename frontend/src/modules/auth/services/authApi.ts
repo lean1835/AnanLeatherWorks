@@ -9,7 +9,7 @@ export const authApi = baseApi.injectEndpoints({
     }),
     login: builder.mutation<
       { success: boolean; message: string; data: { user: User; token?: string } },
-      { username: string; password: string }
+      { username: string; password: string; rememberMe?: boolean }
     >({
       query: (credentials) => ({
         url: "/auth/login",

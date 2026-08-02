@@ -19,13 +19,14 @@ type AuthResult = {
     token: string;
 };
 
-function signAccessToken(user: IUser): string {
+function signAccessToken(user: IUser, rememberMe: boolean = false): string {
     if (!JWT_SECRET) {
         throw new ApiError(500, 'Dịch vụ xác thực chưa được cấu hình.');
     }
+    const expiresIn = rememberMe ? '90d' : '7d';
     return jwt.sign({ id: String(user._id), username: user.username }, JWT_SECRET, {
         algorithm: 'HS256',
-        expiresIn: '7d',
+        expiresIn,
         issuer: JWT_ISSUER,
         audience: JWT_AUDIENCE,
     });
@@ -42,7 +43,11 @@ function serializeUser(user: IUser): AuthResult['user'] {
 }
 
 export class AuthService {
-    public async login(username: string, password: string): Promise<IApiResponse<AuthResult>> {
+    public async login(
+        username: string,
+        password: string,
+        rememberMe: boolean = false,
+    ): Promise<IApiResponse<AuthResult>> {
         const user = await User.findOne({ username: username.toLowerCase().trim() }).select('+passwordHash');
         if (!user) {
             throw new ApiError(401, 'Tên đăng nhập hoặc mật khẩu không chính xác.');
@@ -57,7 +62,7 @@ export class AuthService {
             throw new ApiError(401, 'Tên đăng nhập hoặc mật khẩu không chính xác.');
         }
 
-        const token = signAccessToken(user);
+        const token = signAccessToken(user, rememberMe);
 
         return {
             success: true,

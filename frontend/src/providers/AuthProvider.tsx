@@ -13,8 +13,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const user = meError ? null : meData?.data?.user || null;
 
-  const login = async (username: string, password: string) => {
-    const result = await loginTrigger({ username, password }).unwrap();
+  const login = async (username: string, password: string, rememberMe?: boolean) => {
+    const result = await loginTrigger({ username, password, rememberMe }).unwrap();
     if (result.data?.token) {
       localStorage.setItem("token", result.data.token);
     }

@@ -16,14 +16,19 @@ const authCookieOptions = {
 };
 
 export const login = catchAsync(async (req: Request, res: Response) => {
-    const { username, password } = req.body;
+    const { username, password, rememberMe } = req.body;
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
 
     try {
-        const result = await authService.login(username, password);
+        const isRemember = Boolean(rememberMe);
+        const result = await authService.login(username, password, isRemember);
         recordSuccessfulLogin(ip, username);
 
-        res.cookie('token', result.data!.token, authCookieOptions);
+        const maxAge = isRemember ? 90 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
+        res.cookie('token', result.data!.token, {
+            ...authCookieOptions,
+            maxAge,
+        });
         res.status(200).json(result);
     } catch (error) {
         recordFailedLogin(ip, username);

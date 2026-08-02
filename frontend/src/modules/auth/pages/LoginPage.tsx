@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Alert } from "antd";
+import { Form, Input, Button, Alert, Checkbox } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useAuth } from "../../../providers/authContext";
 import { trimValues, validateNoWhitespace } from "../../../utils/formUtils";
@@ -8,6 +8,7 @@ import { getErrorMessage } from "../../../utils/errorUtils";
 interface LoginFormValues {
   username: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export const LoginPage: React.FC = () => {
@@ -15,12 +16,24 @@ export const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const initialUsername = localStorage.getItem("remembered_username") || "";
+  const initialRemember = localStorage.getItem("remember_me") === "true";
+
   const onFinish = async (values: LoginFormValues) => {
     const trimmed = trimValues(values);
     try {
       setError("");
       setSubmitting(true);
-      await login(trimmed.username, trimmed.password);
+
+      if (values.rememberMe) {
+        localStorage.setItem("remembered_username", trimmed.username);
+        localStorage.setItem("remember_me", "true");
+      } else {
+        localStorage.removeItem("remembered_username");
+        localStorage.removeItem("remember_me");
+      }
+
+      await login(trimmed.username, trimmed.password, values.rememberMe);
     } catch (error: unknown) {
       setError(getErrorMessage(error, "Đăng nhập không thành công. Vui lòng kiểm tra lại."));
     } finally {
@@ -49,7 +62,13 @@ export const LoginPage: React.FC = () => {
           <Alert message={error} type="error" showIcon className="mb-6 rounded-lg border-rose-200 bg-rose-50/70" />
         )}
 
-        <Form layout="vertical" onFinish={onFinish} requiredMark={false} size="large">
+        <Form
+          layout="vertical"
+          onFinish={onFinish}
+          initialValues={{ username: initialUsername, rememberMe: initialRemember }}
+          requiredMark={false}
+          size="large"
+        >
           <Form.Item
             name="username"
             label={<span className="text-xs font-bold uppercase text-on-surface-variant">Tên đăng nhập</span>}
@@ -76,7 +95,13 @@ export const LoginPage: React.FC = () => {
             />
           </Form.Item>
 
-          <Form.Item className="mt-6 mb-2">
+          <Form.Item name="rememberMe" valuePropName="checked" className="mb-4">
+            <Checkbox className="text-xs font-semibold text-on-surface-variant dark:text-gray-300">
+              Ghi nhớ đăng nhập trên thiết bị này
+            </Checkbox>
+          </Form.Item>
+
+          <Form.Item className="mt-4 mb-2">
             <Button
               type="primary"
               htmlType="submit"
