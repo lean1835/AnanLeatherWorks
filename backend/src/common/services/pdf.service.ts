@@ -299,8 +299,16 @@ export async function generateRepairOrderPDF(
                 const col2Height = (order.productName ? 18 : 0) + 52 + 20;
                 const rowHeight = Math.max(82, col2Height, 20 + taskHeight);
 
+                const statusStr = (order.status || '').toString().trim().toLowerCase();
+                let rowBgColor = '#FFFFFF';
+                if (statusStr.includes('hoàn thành')) {
+                    rowBgColor = '#BFDBFE';
+                } else if (statusStr.includes('đã hủy')) {
+                    rowBgColor = '#FECACA';
+                }
+
                 // Row Background & Clean Elegant Divider Lines (#E8E2DB, 1px)
-                doc.rect(startX, currentY, totalWidth, rowHeight).fill('#FFFFFF');
+                doc.rect(startX, currentY, totalWidth, rowHeight).fill(rowBgColor);
                 doc.strokeColor('#E8E2DB')
                     .lineWidth(1)
                     .moveTo(startX, currentY)
@@ -356,7 +364,7 @@ export async function generateRepairOrderPDF(
                 }
 
                 const isDelivered = (order.status || '').toLowerCase().includes('hoàn thành');
-                const sauBorderColor = isDelivered ? '#357246' : '#E5DDD6';
+                const sauBorderColor = isDelivered ? '#0068FF' : '#E5DDD6';
                 if (afterImages.length > 0) {
                     try {
                         doc.save();
@@ -383,8 +391,8 @@ export async function generateRepairOrderPDF(
                     doc.font(fontRegular).fontSize(9).fillColor('#30231E');
                     doc.text(taskLines, 202, taskY, { width: 98, lineGap: 3.5 });
                 } else {
-                    doc.font(fontRegular).fontSize(9).fillColor('#746A64');
-                    doc.text('Sửa chữa đồ da', 202, taskY, { width: 98 });
+                    doc.font(fontRegular).fontSize(8.5).fillColor('#746A64');
+                    doc.text('—', 202, taskY, { width: 98 });
                 }
 
                 // Col 4: PHỤ KIỆN THAY THẾ (8pt left padding from X=308)
@@ -413,8 +421,16 @@ export async function generateRepairOrderPDF(
 
                 // Col 5: TỔNG TIỀN (Top Aligned at currentY + 10, ends at 466pt)
                 const amountY = currentY + 10;
-                doc.font(fontBold).fontSize(10).fillColor('#30231E');
-                doc.text(formatVND(itemTotal), 408, amountY, { width: 58, align: 'right' });
+                const isInProgress = order.status === 'Đang sửa' || (order.status || '').toLowerCase().includes('đang sửa');
+                if (isInProgress) {
+                    doc.font(fontBold).fontSize(10).fillColor('#30231E');
+                    doc.text('0đ', 408, amountY, { width: 58, align: 'right' });
+                    doc.font(fontRegular).fontSize(7).fillColor('#746A64');
+                    doc.text('(Chưa hoàn thành)', 408, amountY + 13, { width: 68, align: 'center' });
+                } else {
+                    doc.font(fontBold).fontSize(10).fillColor('#30231E');
+                    doc.text(formatVND(itemTotal), 408, amountY, { width: 58, align: 'right' });
+                }
 
                 // Col 6: GHI CHÚ (starts at 484pt -> 18pt gap from Col 5)
                 const noteY = currentY + 10;
@@ -422,6 +438,38 @@ export async function generateRepairOrderPDF(
                 doc.text(order.note || '—', 484, noteY, { width: 75.28 });
 
                 currentY += rowHeight;
+
+                // Total Summary Row ("TỔNG CỘNG:")
+                const totalRowHeight = 28;
+                if (currentY + totalRowHeight > 760) {
+                    doc.addPage();
+                    currentY = 36;
+                }
+
+                doc.rect(startX, currentY, totalWidth, totalRowHeight).fill('#F7F4F1');
+
+                doc.strokeColor('#DDD5CE')
+                    .lineWidth(1)
+                    .moveTo(startX, currentY)
+                    .lineTo(endX, currentY)
+                    .stroke()
+                    .moveTo(startX, currentY + totalRowHeight)
+                    .lineTo(endX, currentY + totalRowHeight)
+                    .stroke();
+
+                doc.strokeColor('#E0D8D0').lineWidth(0.8);
+                doc.moveTo(408, currentY).lineTo(408, currentY + totalRowHeight).stroke();
+                doc.moveTo(476, currentY).lineTo(476, currentY + totalRowHeight).stroke();
+
+                const summaryY = currentY + 9;
+                doc.font(fontBold).fontSize(9.5).fillColor('#1C1410');
+                doc.text('TỔNG CỘNG:', startX, summaryY, { width: 364, align: 'right' });
+
+                const singleGrandTotal = isInProgress ? 0 : itemTotal;
+                doc.font(fontBold).fontSize(10).fillColor('#1C1410');
+                doc.text(formatVND(singleGrandTotal), 408, summaryY, { width: 58, align: 'right' });
+
+                currentY += totalRowHeight;
 
                 currentY += 24;
 
@@ -714,7 +762,13 @@ export async function generateCustomerGroupPDF(
                     doc.addPage();
                     currentY = 36;
                 }
-                const rowBg = '#FFFFFF';
+                const statusStr = (order.status || '').toString().trim().toLowerCase();
+                let rowBg = '#FFFFFF';
+                if (statusStr.includes('hoàn thành')) {
+                    rowBg = '#BFDBFE';
+                } else if (statusStr.includes('đã hủy')) {
+                    rowBg = '#FECACA';
+                }
                 doc.rect(startX, currentY, totalWidth, rowHeight).fill(rowBg);
                 doc.strokeColor('#E8E2DB')
                     .lineWidth(1)
@@ -770,7 +824,7 @@ export async function generateCustomerGroupPDF(
                 }
 
                 const isDelivered = (order.status || '').toLowerCase().includes('hoàn thành');
-                const sauBorderColor = isDelivered ? '#357246' : '#E5DDD6';
+                const sauBorderColor = isDelivered ? '#0068FF' : '#E5DDD6';
                 if (afterImages.length > 0) {
                     try {
                         doc.save();
@@ -797,8 +851,8 @@ export async function generateCustomerGroupPDF(
                     doc.font(fontRegular).fontSize(9).fillColor('#30231E');
                     doc.text(taskLines, 202, taskY, { width: 98, lineGap: 3.5 });
                 } else {
-                    doc.font(fontRegular).fontSize(9).fillColor('#746A64');
-                    doc.text('Sửa chữa đồ da', 202, taskY, { width: 98 });
+                    doc.font(fontRegular).fontSize(8.5).fillColor('#746A64');
+                    doc.text('—', 202, taskY, { width: 98 });
                 }
 
                 // Col 4: PHỤ KIỆN THAY THẾ (8pt left padding from X=308)
@@ -827,8 +881,16 @@ export async function generateCustomerGroupPDF(
 
                 // Col 5: TỔNG TIỀN (Top Aligned at currentY + 10, ends at 466pt)
                 const amountY = currentY + 10;
-                doc.font(fontBold).fontSize(10).fillColor('#30231E');
-                doc.text(formatVND(itemTotal), 408, amountY, { width: 58, align: 'right' });
+                const isItemInProgress = order.status === 'Đang sửa' || (order.status || '').toLowerCase().includes('đang sửa');
+                if (isItemInProgress) {
+                    doc.font(fontBold).fontSize(10).fillColor('#30231E');
+                    doc.text('0đ', 408, amountY, { width: 58, align: 'right' });
+                    doc.font(fontRegular).fontSize(7).fillColor('#746A64');
+                    doc.text('(Chưa hoàn thành)', 408, amountY + 13, { width: 68, align: 'center' });
+                } else {
+                    doc.font(fontBold).fontSize(10).fillColor('#30231E');
+                    doc.text(formatVND(itemTotal), 408, amountY, { width: 58, align: 'right' });
+                }
 
                 // Col 6: GHI CHÚ (starts at 484pt -> 18pt gap from Col 5)
                 const noteY = currentY + 10;
@@ -837,6 +899,42 @@ export async function generateCustomerGroupPDF(
 
                 currentY += rowHeight;
             });
+
+            // Total Summary Row ("TỔNG CỘNG:")
+            const grandTotal = ordersWithImages.reduce((sum, item) => {
+                const isItemInProgress = item.status === 'Đang sửa' || (item.status || '').toLowerCase().includes('đang sửa');
+                return sum + (isItemInProgress ? 0 : Number(item.totalAmount) || 0);
+            }, 0);
+
+            const totalRowHeight = 28;
+            if (currentY + totalRowHeight > 760) {
+                doc.addPage();
+                currentY = 36;
+            }
+
+            doc.rect(startX, currentY, totalWidth, totalRowHeight).fill('#F7F4F1');
+
+            doc.strokeColor('#DDD5CE')
+                .lineWidth(1)
+                .moveTo(startX, currentY)
+                .lineTo(endX, currentY)
+                .stroke()
+                .moveTo(startX, currentY + totalRowHeight)
+                .lineTo(endX, currentY + totalRowHeight)
+                .stroke();
+
+            doc.strokeColor('#E0D8D0').lineWidth(0.8);
+            doc.moveTo(408, currentY).lineTo(408, currentY + totalRowHeight).stroke();
+            doc.moveTo(476, currentY).lineTo(476, currentY + totalRowHeight).stroke();
+
+            const summaryY = currentY + 9;
+            doc.font(fontBold).fontSize(9.5).fillColor('#1C1410');
+            doc.text('TỔNG CỘNG:', startX, summaryY, { width: 364, align: 'right' });
+
+            doc.font(fontBold).fontSize(10).fillColor('#1C1410');
+            doc.text(formatVND(grandTotal), 408, summaryY, { width: 58, align: 'right' });
+
+            currentY += totalRowHeight;
 
             currentY += 24;
             if (currentY + 110 > 760) {

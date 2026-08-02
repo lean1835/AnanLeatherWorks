@@ -34,12 +34,14 @@ interface DashboardAggregation {
 interface DashboardData {
     stats: {
         total: number;
+        totalCustomers: number;
         newOrders: number;
         repairing: number;
         completed: number;
         cancelled: number;
     };
     totalOrders: number;
+    totalCustomers: number;
     newOrders: number;
     inProgress: number;
     completed: number;
@@ -157,10 +159,9 @@ export class RepairOrderService {
             last12Months.push({ ...period, key: `${period.month}/${period.year}` });
         }
 
-        const [totalOrders, newOrders, inProgress, completed, cancelledOrders, monthlyStats, recentOrders] =
+        const [totalOrders, inProgress, completed, cancelledOrders, monthlyStats, recentOrders, totalCustomers] =
             await Promise.all([
                 RepairOrder.countDocuments(),
-                RepairOrder.countDocuments({ status: 'Mới nhận' }),
                 RepairOrder.countDocuments({ status: 'Đang sửa' }),
                 RepairOrder.countDocuments({ status: 'Hoàn thành' }),
                 RepairOrder.countDocuments({ status: 'Đã hủy' }),
@@ -185,6 +186,7 @@ export class RepairOrderService {
                     .limit(5)
                     .lean()
                     .exec(),
+                Customer.countDocuments(),
             ]);
 
         const statsMap = new Map<string, { count: number; revenue: number }>();
@@ -211,13 +213,15 @@ export class RepairOrderService {
             data: {
                 stats: {
                     total: totalOrders,
-                    newOrders,
+                    totalCustomers,
+                    newOrders: 0,
                     repairing: inProgress,
                     completed,
                     cancelled: cancelledOrders,
                 },
                 totalOrders,
-                newOrders,
+                totalCustomers,
+                newOrders: 0,
                 inProgress,
                 completed,
                 cancelled: cancelledOrders,
@@ -324,7 +328,7 @@ export class RepairOrderService {
         const beforeImages = normalizeImageReferences(payload.beforeImages);
         const afterImages = normalizeImageReferences(payload.afterImages);
 
-        const initialStatus = payload.status || 'Mới nhận';
+        const initialStatus = payload.status || 'Đang sửa';
         const isInitialCompleted = initialStatus === 'Hoàn thành';
 
         let orderId = '';

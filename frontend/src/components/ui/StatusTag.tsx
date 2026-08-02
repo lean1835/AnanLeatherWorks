@@ -19,14 +19,11 @@ const StatusTag: React.FC<StatusTagProps> = ({ status, isOverdue }) => {
   let styleClass = "bg-zinc-100 text-zinc-700 border-zinc-200";
 
   switch (status) {
-    case ORDER_STATUS.NEW:
-      styleClass = "bg-amber-100 text-amber-800 border-amber-200";
-      break;
     case ORDER_STATUS.IN_PROGRESS:
-      styleClass = "bg-sky-100 text-sky-700 border-sky-200";
+      styleClass = "bg-white text-gray-900 border-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700";
       break;
     case ORDER_STATUS.COMPLETED:
-      styleClass = "bg-green-100 text-green-700 border-green-200";
+      styleClass = "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-700 font-extrabold";
       break;
     case ORDER_STATUS.CANCELLED:
       styleClass = "bg-rose-100 text-rose-800 border-rose-200";

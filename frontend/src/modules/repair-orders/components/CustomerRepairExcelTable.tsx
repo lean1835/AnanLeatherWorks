@@ -63,41 +63,32 @@ const STATUS_CONFIG: Record<
   string,
   { label: string; bg: string; text: string; border: string; icon: React.ReactNode; rowBg: string; sttBg: string }
 > = {
-  [ORDER_STATUS.NEW]: {
-    label: "Mới nhận",
-    bg: "bg-blue-50 dark:bg-blue-950/60",
-    text: "text-blue-700 dark:text-blue-300",
-    border: "border-blue-200 dark:border-blue-800",
-    icon: <ClockCircleOutlined className="text-[10px]" />,
-    rowBg: "bg-blue-50/70 dark:bg-blue-950/40 hover:bg-blue-100/90 dark:hover:bg-blue-900/60",
-    sttBg: "bg-status-new-cell dark:bg-status-new-cell-dark group-hover:bg-status-new-cell-hover",
-  },
   [ORDER_STATUS.IN_PROGRESS]: {
     label: "Đang sửa",
-    bg: "bg-amber-50 dark:bg-amber-950/60",
-    text: "text-amber-800 dark:text-amber-300",
-    border: "border-amber-300 dark:border-amber-700",
-    icon: <SyncOutlined className="text-[10px]" />,
-    rowBg: "bg-amber-50/70 dark:bg-amber-950/40 hover:bg-amber-100/90 dark:hover:bg-amber-900/60",
-    sttBg: "bg-status-progress-cell dark:bg-status-progress-cell-dark group-hover:bg-status-progress-cell-hover",
+    bg: "bg-white dark:bg-gray-800",
+    text: "text-gray-900 dark:text-gray-100",
+    border: "border-gray-300 dark:border-gray-700",
+    icon: <SyncOutlined className="text-[10px] text-gray-700 dark:text-gray-300" />,
+    rowBg: "bg-white dark:bg-surface-dark hover:bg-gray-50/80 dark:hover:bg-gray-800/60",
+    sttBg: "bg-white dark:bg-surface-dark group-hover:bg-gray-50/80 dark:group-hover:bg-gray-800/60",
   },
   [ORDER_STATUS.COMPLETED]: {
     label: "Hoàn thành",
-    bg: "bg-emerald-50 dark:bg-emerald-950/60",
-    text: "text-emerald-700 dark:text-emerald-300",
-    border: "border-emerald-300 dark:border-emerald-700",
-    icon: <CheckCircleOutlined className="text-[10px]" />,
-    rowBg: "bg-emerald-50/70 dark:bg-emerald-950/40 hover:bg-emerald-100/90 dark:hover:bg-emerald-900/60",
-    sttBg: "bg-status-complete-cell dark:bg-status-complete-cell-dark group-hover:bg-status-complete-cell-hover",
+    bg: "bg-blue-100 dark:bg-blue-900/70",
+    text: "text-blue-800 dark:text-blue-200 font-extrabold",
+    border: "border-blue-400 dark:border-blue-600",
+    icon: <CheckCircleOutlined className="text-[10px] text-blue-700 dark:text-blue-300" />,
+    rowBg: "bg-blue-200/90 dark:bg-blue-900/80 hover:bg-blue-300/90 dark:hover:bg-blue-800/90",
+    sttBg: "bg-blue-300/95 dark:bg-blue-800/90 text-blue-950 font-black group-hover:bg-blue-400/90",
   },
   [ORDER_STATUS.CANCELLED]: {
     label: "Đã hủy",
-    bg: "bg-red-50 dark:bg-red-950/60",
-    text: "text-red-700 dark:text-red-300",
-    border: "border-red-200 dark:border-red-800",
+    bg: "bg-red-100 dark:bg-red-900/70",
+    text: "text-red-800 dark:text-red-200",
+    border: "border-red-300 dark:border-red-700",
     icon: <CloseCircleOutlined className="text-[10px]" />,
-    rowBg: "bg-red-50/60 dark:bg-red-950/40 hover:bg-red-100/90 dark:hover:bg-red-900/60",
-    sttBg: "bg-status-cancel-cell dark:bg-status-cancel-cell-dark group-hover:bg-status-cancel-cell-hover",
+    rowBg: "bg-red-200/90 dark:bg-red-900/80 hover:bg-red-300/90 dark:hover:bg-red-800/90",
+    sttBg: "bg-red-300/95 dark:bg-red-800/90 group-hover:bg-red-400/90",
   },
 };
 
@@ -224,7 +215,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
       ) as string[];
     }, [item.replacementMaterials]);
 
-    const statusCfg = STATUS_CONFIG[item.status as string] || STATUS_CONFIG[ORDER_STATUS.NEW];
+    const statusCfg = STATUS_CONFIG[item.status as string] || STATUS_CONFIG[ORDER_STATUS.IN_PROGRESS];
 
     const submitTask = useCallback(async () => {
       const value = taskInput.trim();
@@ -299,7 +290,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
         <tr className={`${statusCfg.rowBg} transition-colors group`}>
           <td
             onClick={() => toggleRowExpand(rowKey)}
-            className={`sticky left-0 z-10 ${statusCfg.sttBg} dark:bg-surface-dark p-2 text-center font-mono font-bold text-gray-700 dark:text-gray-200 text-xs border-r border-gray-200 dark:border-gray-700/80 shadow-sm transition-colors cursor-pointer select-none`}
+            className={`sticky left-0 z-10 ${statusCfg.sttBg} p-2 text-center font-mono font-bold text-gray-800 dark:text-gray-100 text-xs border-r border-gray-300 dark:border-gray-700/80 shadow-sm transition-colors cursor-pointer select-none`}
             title="Nhấn để mở/ẩn thông tin chi tiết (Trạng thái, Phụ kiện, Ngày nhận, Ghi chú)"
           >
             <div className="flex flex-col items-center justify-center gap-0.5">
@@ -741,7 +732,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                           getPopupContainer={(triggerNode) => triggerNode.closest(".origin-top-left") || document.body}
                           className="w-full text-[10px]"
                           labelRender={({ value }) => {
-                            const cfg = STATUS_CONFIG[value as string] || STATUS_CONFIG[ORDER_STATUS.NEW];
+                            const cfg = STATUS_CONFIG[value as string] || STATUS_CONFIG[ORDER_STATUS.IN_PROGRESS];
                             return (
                               <span
                                 className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-bold whitespace-nowrap ${cfg.bg} ${cfg.text} ${cfg.border}`}
@@ -972,7 +963,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     const [modalTotalAmount, setModalTotalAmount] = useState<number | null>(0);
     const [modalReceivedAt, setModalReceivedAt] = useState<dayjs.Dayjs>(dayjs());
     const [modalDueAt, setModalDueAt] = useState<dayjs.Dayjs>(dayjs().endOf("month"));
-    const [modalStatus, setModalStatus] = useState<OrderStatus>(ORDER_STATUS.NEW);
+    const [modalStatus, setModalStatus] = useState<OrderStatus>(ORDER_STATUS.IN_PROGRESS);
     const [modalNote, setModalNote] = useState("");
     const [modalTasks, setModalTasks] = useState<string[]>([]);
     const [modalTaskInput, setModalTaskInput] = useState("");
@@ -1115,7 +1106,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
             : selectedMonth && selectedYear
               ? dayjs(`${selectedYear}-${selectedMonth}-01`).endOf("month")
               : dayjs().endOf("month"),
-          status: ord.status || ORDER_STATUS.NEW,
+          status: ((ord.status as string) === "Mới nhận" ? ORDER_STATUS.IN_PROGRESS : ord.status) || ORDER_STATUS.IN_PROGRESS,
           note: ord.note || "",
           tasks: ord.tasks || [],
           replacementMaterials: ord.replacementMaterials || [],
@@ -1680,7 +1671,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
       const year = selectedYear || dayjs().year();
       setModalReceivedAt(getDefaultReceivedAt(month, year));
       setModalDueAt(getPeriodEnd(month, year));
-      setModalStatus(ORDER_STATUS.NEW);
+      setModalStatus(ORDER_STATUS.IN_PROGRESS);
       setModalNote("");
       setModalTasks([]);
       setModalTaskInput("");
@@ -2348,7 +2339,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 showSearch={false}
                 className="w-full rounded-md text-xs"
                 labelRender={({ value }) => {
-                  const cfg = STATUS_CONFIG[value as string] || STATUS_CONFIG[ORDER_STATUS.NEW];
+                  const cfg = STATUS_CONFIG[value as string] || STATUS_CONFIG[ORDER_STATUS.IN_PROGRESS];
                   return (
                     <span
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-bold ${cfg.bg} ${cfg.text} ${cfg.border}`}

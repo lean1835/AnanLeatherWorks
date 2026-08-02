@@ -7,6 +7,8 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
+  FileTextOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import { useGetDashboardStatsQuery } from "../services/dashboardApi";
 import StatusTag from "../../../components/ui/StatusTag";
@@ -38,10 +40,10 @@ const MonthlyTrendChart: React.FC<{ data: { month: string; count: number; revenu
     const maxCount = Math.max(...counts, 5); // at least 5 for scale
 
     const width = 500;
-    const height = 150;
+    const height = 180;
     const paddingLeft = 30;
-    const paddingRight = 15;
-    const paddingTop = 15;
+    const paddingRight = 25;
+    const paddingTop = 45;
     const paddingBottom = 25;
 
     const chartWidth = width - paddingLeft - paddingRight;
@@ -87,7 +89,7 @@ const MonthlyTrendChart: React.FC<{ data: { month: string; count: number; revenu
         <div className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-wider mb-2">
           Biểu đồ tăng trưởng đơn hàng theo tháng (theo ngày tiếp nhận)
         </div>
-        <div className="relative w-full overflow-hidden flex-1 flex items-center">
+        <div className="relative w-full flex-1 flex items-center pt-1">
           <svg
             viewBox={`0 0 ${width} ${height}`}
             className="w-full h-auto overflow-visible"
@@ -168,6 +170,18 @@ const MonthlyTrendChart: React.FC<{ data: { month: string; count: number; revenu
               const isActive = i === activeIdx;
               if (!isActive) return null;
 
+              const tooltipWidth = 90;
+              const tooltipHeight = 36;
+              const ttX = Math.max(5, Math.min(width - tooltipWidth - 5, p.x - tooltipWidth / 2));
+              const ttCenterX = ttX + tooltipWidth / 2;
+
+              const isNearTop = p.y < 42;
+              const ttY = isNearTop ? p.y + 12 : p.y - 48;
+              const arrowY1 = isNearTop ? p.y + 12 : p.y - 12;
+              const arrowY2 = isNearTop ? p.y + 7 : p.y - 8;
+              const labelY = ttY + 14;
+              const valueY = ttY + 28;
+
               return (
                 <g key={`tooltip-${i}`} className="pointer-events-none">
                   {/* Vertical guide line */}
@@ -194,23 +208,23 @@ const MonthlyTrendChart: React.FC<{ data: { month: string; count: number; revenu
                   <g>
                     {/* Background with shadow */}
                     <rect
-                      x={p.x - 45}
-                      y={p.y - 48}
-                      width="90"
-                      height="36"
+                      x={ttX}
+                      y={ttY}
+                      width={tooltipWidth}
+                      height={tooltipHeight}
                       rx="6"
                       fill={BRAND_COLORS.tooltipBackground}
                       filter="drop-shadow(0 4px 6px rgba(0,0,0,0.15))"
                     />
                     {/* Tooltip Arrow */}
                     <polygon
-                      points={`${p.x - 4},${p.y - 12} ${p.x + 4},${p.y - 12} ${p.x},${p.y - 8}`}
+                      points={`${p.x - 4},${arrowY1} ${p.x + 4},${arrowY1} ${p.x},${arrowY2}`}
                       fill={BRAND_COLORS.tooltipBackground}
                     />
                     {/* Month Label */}
                     <text
-                      x={p.x}
-                      y={p.y - 36}
+                      x={ttCenterX}
+                      y={labelY}
                       textAnchor="middle"
                       fill={BRAND_COLORS.tooltipMuted}
                       fontSize="8"
@@ -221,8 +235,8 @@ const MonthlyTrendChart: React.FC<{ data: { month: string; count: number; revenu
                     </text>
                     {/* Value */}
                     <text
-                      x={p.x}
-                      y={p.y - 22}
+                      x={ttCenterX}
+                      y={valueY}
                       textAnchor="middle"
                       fill={BRAND_COLORS.white}
                       fontSize="12"
@@ -247,7 +261,7 @@ const MonthlyTrendChart: React.FC<{ data: { month: string; count: number; revenu
                   width={colWidth}
                   height={chartHeight}
                   fill="transparent"
-                  className="cursor-pointer"
+                  className="cursor-pointer outline-none focus:outline-none focus-visible:outline-none"
                   role="button"
                   tabIndex={0}
                   aria-label={`Tháng ${p.label}: ${p.value} đơn hàng`}
@@ -302,7 +316,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigateToRepair
     const rawData = resData?.data;
     const stats = {
       total: rawData?.stats?.total ?? rawData?.totalOrders ?? 0,
-      newOrders: rawData?.stats?.newOrders ?? rawData?.newOrders ?? 0,
+      totalCustomers: rawData?.stats?.totalCustomers ?? rawData?.totalCustomers ?? 0,
       repairing: rawData?.stats?.repairing ?? rawData?.inProgress ?? 0,
       completed: rawData?.stats?.completed ?? rawData?.completed ?? 0,
       cancelled: rawData?.stats?.cancelled ?? rawData?.cancelled ?? 0,
@@ -345,49 +359,49 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigateToRepair
       {/* Row 1: 4 Statuses */}
       <Row gutter={[12, 12]}>
         <Col xs={12} sm={6}>
-          <div className="rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/40 dark:bg-blue-950/20 p-3 sm:p-4 shadow-sm hover:border-blue-300 transition-all">
+          <div className="rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/40 dark:bg-purple-950/20 p-3 sm:p-4 shadow-sm hover:border-purple-300 transition-all">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 tracking-wider">
-                  Mới nhận
+                <div className="text-[10px] uppercase font-bold text-purple-700 dark:text-purple-300 tracking-wider">
+                  Tổng số phiếu
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-blue-800 dark:text-blue-200 mt-0.5 sm:mt-1">
-                  {stats.newOrders}
+                <div className="text-xl sm:text-2xl font-bold text-purple-800 dark:text-purple-200 mt-0.5 sm:mt-1">
+                  {stats.total}
                 </div>
               </div>
-              <ClockCircleOutlined className="text-xl sm:text-2xl text-blue-500/40" />
+              <FileTextOutlined className="text-xl sm:text-2xl text-purple-500/40" />
             </div>
           </div>
         </Col>
 
         <Col xs={12} sm={6}>
-          <div className="rounded-xl border border-amber-200/90 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-3 sm:p-4 shadow-sm hover:border-amber-300 transition-all">
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark p-3 sm:p-4 shadow-sm hover:border-gray-300 transition-all">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300 tracking-wider">
+                <div className="text-[10px] uppercase font-bold text-gray-900 dark:text-gray-100 tracking-wider">
                   Đang sửa
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-amber-800 dark:text-amber-200 mt-0.5 sm:mt-1">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mt-0.5 sm:mt-1">
                   {stats.repairing}
                 </div>
               </div>
-              <ToolOutlined className="text-xl sm:text-2xl text-amber-500/40" />
+              <ToolOutlined className="text-xl sm:text-2xl text-gray-400" />
             </div>
           </div>
         </Col>
 
         <Col xs={12} sm={6}>
-          <div className="rounded-xl border border-emerald-200/90 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 p-3 sm:p-4 shadow-sm hover:border-emerald-300 transition-all">
+          <div className="rounded-xl border border-blue-200/90 dark:border-blue-900/40 bg-blue-50/50 dark:bg-blue-950/20 p-3 sm:p-4 shadow-sm hover:border-blue-300 transition-all">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-[10px] uppercase font-bold text-emerald-700 dark:text-emerald-300 tracking-wider">
+                <div className="text-[10px] uppercase font-bold text-blue-700 dark:text-blue-300 tracking-wider">
                   Hoàn thành
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-emerald-800 dark:text-emerald-200 mt-0.5 sm:mt-1">
+                <div className="text-xl sm:text-2xl font-bold text-blue-800 dark:text-blue-200 mt-0.5 sm:mt-1">
                   {stats.completed}
                 </div>
               </div>
-              <CheckCircleOutlined className="text-xl sm:text-2xl text-emerald-500/40" />
+              <CheckCircleOutlined className="text-xl sm:text-2xl text-blue-500/80" />
             </div>
           </div>
         </Col>
@@ -409,21 +423,21 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigateToRepair
         </Col>
       </Row>
 
-      {/* Row 2: Total Orders (Left) + Chart (Right) */}
+      {/* Row 2: Total Customers (Left) + Chart (Right) */}
       <Row gutter={[12, 12]} className="items-stretch">
         <Col xs={24} md={6}>
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-surface-dark p-4 shadow-sm hover:border-gray-300 transition-all h-full flex flex-col justify-center min-h-[120px] md:min-h-0">
+          <div className="rounded-xl border border-amber-200/90 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-4 shadow-sm hover:border-amber-300 transition-all h-full flex flex-col justify-center min-h-[120px] md:min-h-0">
             <div className="flex justify-between items-center w-full">
               <div>
-                <div className="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 tracking-wider">
-                  Tổng số phiếu
+                <div className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300 tracking-wider">
+                  Tổng số khách hàng
                 </div>
-                <div className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100 mt-1 sm:mt-2">
-                  {stats.total}
+                <div className="text-3xl md:text-4xl font-extrabold text-amber-800 dark:text-amber-200 mt-1 sm:mt-2">
+                  {stats.totalCustomers}
                 </div>
-                <div className="text-[10px] text-gray-400 mt-2 font-medium">Toàn bộ đơn hàng đã ghi nhận</div>
+                <div className="text-[10px] text-amber-700/80 dark:text-amber-400 mt-2 font-medium">Toàn bộ khách hàng đã ghi nhận</div>
               </div>
-              <SolutionOutlined className="text-3xl sm:text-4xl text-gray-400/30" />
+              <UserOutlined className="text-3xl sm:text-4xl text-amber-500/40" />
             </div>
           </div>
         </Col>

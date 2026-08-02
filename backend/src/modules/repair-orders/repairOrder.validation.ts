@@ -14,7 +14,7 @@ const imageReferenceSchema = Joi.alternatives()
     })
     .messages({ 'image.invalid': 'Ảnh phải dùng object key hợp lệ của hệ thống' });
 
-const statusSchema = Joi.string().valid('Mới nhận', 'Đang sửa', 'Hoàn thành', 'Đã hủy');
+const statusSchema = Joi.string().valid('Đang sửa', 'Hoàn thành', 'Đã hủy');
 const textListSchema = Joi.array().max(50).items(Joi.string().trim().max(500).allow(''));
 const imageListSchema = Joi.array().max(10).items(imageReferenceSchema);
 

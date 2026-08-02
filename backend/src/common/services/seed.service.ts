@@ -3,6 +3,20 @@ import RepairOrder from '@modules/repair-orders/repairOrder.model';
 import { logger } from '@common/utils/logger';
 
 /**
+ * Migrates any legacy repair orders with status 'Mới nhận' to 'Đang sửa' on server startup.
+ */
+export async function migrateLegacyStatuses(): Promise<void> {
+    try {
+        const result = await RepairOrder.updateMany({ status: 'Mới nhận' }, { $set: { status: 'Đang sửa' } });
+        if (result.modifiedCount > 0) {
+            logger.info(`Migrated ${result.modifiedCount} legacy 'Mới nhận' repair orders to 'Đang sửa'.`);
+        }
+    } catch (error) {
+        logger.error('Failed to migrate legacy repair order statuses:', error);
+    }
+}
+
+/**
  * Optional, idempotent sample data for an explicitly enabled development environment.
  * Authentication users are deliberately never created here.
  */
@@ -52,7 +66,7 @@ export async function seedInitialData(): Promise<void> {
             productName: 'Túi da mẫu',
             receivedAt,
             dueAt,
-            status: 'Mới nhận',
+            status: 'Đang sửa',
             tasks: ['Vệ sinh và dưỡng da'],
             replacementMaterials: [],
             beforeImages: [],

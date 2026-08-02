@@ -16,7 +16,7 @@ export interface Customer {
   note?: string;
 }
 
-export type OrderStatus = "Mới nhận" | "Đang sửa" | "Hoàn thành" | "Đã hủy";
+export type OrderStatus = "Đang sửa" | "Hoàn thành" | "Đã hủy";
 
 export interface RepairImageReference {
   objectKey?: string;
@@ -63,6 +63,7 @@ export interface CustomerGroupItem {
 export interface DashboardData {
   stats: {
     total: number;
+    totalCustomers?: number;
     newOrders?: number;
     repairing: number;
     completed: number;
@@ -72,6 +73,7 @@ export interface DashboardData {
   recentOrders: RepairOrder[];
   overdueOrders?: RepairOrder[];
   totalOrders?: number;
+  totalCustomers?: number;
   newOrders?: number;
   inProgress?: number;
   completed?: number;

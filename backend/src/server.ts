@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import type { Server } from 'http';
 import { ENABLE_DEV_SEED, MONGODB_URI, NODE_ENV, PORT, validateEnvironment } from '@config/environment';
-import { seedInitialData } from '@common/services/seed.service';
+import { migrateLegacyStatuses, seedInitialData } from '@common/services/seed.service';
 import { logger } from '@common/utils/logger';
 
 let httpServer: Server | undefined;
@@ -13,6 +13,8 @@ async function bootstrap() {
         logger.info('⏳ Connecting to MongoDB Database...');
         await mongoose.connect(MONGODB_URI, { autoIndex: NODE_ENV !== 'production' });
         logger.info('✅ MongoDB Database connected successfully.');
+
+        await migrateLegacyStatuses();
 
         if (NODE_ENV !== 'production' && ENABLE_DEV_SEED) {
             await seedInitialData();

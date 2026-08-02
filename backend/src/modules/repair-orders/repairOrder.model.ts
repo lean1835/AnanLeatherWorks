@@ -19,8 +19,8 @@ const RepairOrderSchema: Schema = new Schema(
         },
         status: {
             type: String,
-            enum: ['Mới nhận', 'Đang sửa', 'Hoàn thành', 'Đã hủy'],
-            default: 'Mới nhận',
+            enum: ['Đang sửa', 'Hoàn thành', 'Đã hủy'],
+            default: 'Đang sửa',
         },
         beforeImages: {
             type: [{ type: String }],

@@ -1,7 +1,7 @@
 import { Document, Types } from 'mongoose';
 import type { ICustomer } from './customer.interface';
 
-export type RepairOrderStatus = 'Mới nhận' | 'Đang sửa' | 'Hoàn thành' | 'Đã hủy';
+export type RepairOrderStatus = 'Đang sửa' | 'Hoàn thành' | 'Đã hủy';
 
 export interface IRepairOrder extends Document {
     _id: Types.ObjectId;

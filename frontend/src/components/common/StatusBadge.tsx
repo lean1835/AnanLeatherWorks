@@ -9,12 +9,10 @@ interface StatusBadgeProps {
 export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(({ status, isOverdue }) => {
   const getBadgeStyle = () => {
     switch (status) {
-      case "Mới nhận":
-        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800";
       case "Đang sửa":
-        return "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800";
+        return "bg-white text-gray-900 border-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700";
       case "Hoàn thành":
-        return "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800";
+        return "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-700 font-extrabold";
       case "Đã hủy":
         return "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800";
       default:
