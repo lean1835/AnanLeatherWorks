@@ -350,7 +350,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigateToRepair
     <div className="dashboard-container pb-8 space-y-6">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <h1 className="font-serif text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-100 m-0 tracking-tight">
+          <h1 className="font-serif text-2xl font-bold text-gray-900 dark:text-gray-100 m-0 tracking-tight">
             Tổng quan
           </h1>
         </div>

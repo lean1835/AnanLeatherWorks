@@ -153,30 +153,31 @@ export const CustomerPage: React.FC = () => {
   return (
     <div className="customer-page pb-8">
       <div className="flex flex-col gap-1 mb-6">
-        <h1 className="font-serif text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 m-0 tracking-tight">
+        <h1 className="font-serif text-2xl font-bold text-gray-900 dark:text-gray-100 m-0 tracking-tight">
           Quản lý Khách hàng
         </h1>
       </div>
 
+      <div className="flex justify-end mb-3">
+        <AccessControl permission={PERMISSIONS.CUSTOMERS.CREATE}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsNewCustomerOpen(true)}
+            className="rounded-lg font-bold text-xs !bg-primary-container hover:!bg-primary-container-hover !border-primary-container hover:!border-primary-container-hover text-white h-9 px-4 flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            Thêm khách hàng
+          </Button>
+        </AccessControl>
+      </div>
+
       <FilterCard>
-        <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex-1 sm:max-w-md order-2 sm:order-1">
-            <DebouncedSearchInput
-              value={search}
-              onChange={(val) => setSearch(val)}
-              placeholder="Tìm theo tên, SĐT hoặc Email..."
-            />
-          </div>
-          <AccessControl permission={PERMISSIONS.CUSTOMERS.CREATE}>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsNewCustomerOpen(true)}
-              className="rounded-lg font-bold text-xs !bg-primary-container hover:!bg-primary-container-hover !border-primary-container hover:!border-primary-container-hover text-white h-9 px-4 flex items-center gap-1.5 self-end sm:self-auto order-1 sm:order-2"
-            >
-              Thêm khách hàng
-            </Button>
-          </AccessControl>
+        <div className="w-full">
+          <DebouncedSearchInput
+            value={search}
+            onChange={(val) => setSearch(val)}
+            placeholder="Tìm theo tên, SĐT hoặc Email..."
+          />
         </div>
       </FilterCard>
 
