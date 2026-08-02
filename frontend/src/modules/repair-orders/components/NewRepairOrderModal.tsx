@@ -21,6 +21,7 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   FileImageOutlined,
+  ClockCircleOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useLazyGetCustomerByPhoneQuery } from "../../customers/services/customerApi";
@@ -266,7 +267,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
         fullName: trimmed.fullName,
         customerNote: trimmed.customerNote || "",
         productName: trimmed.productName,
-        receivedAt: toDateOnly(trimmed.receivedAt),
+        receivedAt: trimmed.receivedAt ? dayjs(trimmed.receivedAt).toISOString() : dayjs().toISOString(),
         dueAt: toDateOnly(trimmed.dueAt),
         note: trimmed.note || "",
         totalAmount: Number(trimmed.totalAmount) || 0,
@@ -293,7 +294,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
       open={isOpen}
       onCancel={() => void closeAndReset()}
       closable={!submitting && !uploadingImage}
-      maskClosable={!submitting && !uploadingImage}
+      maskClosable={false}
       footer={null}
       width={780}
       title={
@@ -401,18 +402,31 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
             <Col xs={24} sm={12}>
               <Form.Item
                 name="receivedAt"
-                label="Ngày nhận hàng"
+                label="Ngày nhận (Ngày tạo)"
                 rules={[{ required: true, message: "Chọn ngày nhận!" }]}
+                className="mb-1"
               >
                 <DatePicker
                   format="DD/MM/YYYY"
-                  className="w-full rounded-lg"
+                  className="w-full rounded-lg font-mono"
                   onChange={(date) => {
                     if (date) {
                       form.setFieldsValue({ dueAt: dayjs(date).endOf("month") });
                     }
                   }}
                 />
+              </Form.Item>
+              <Form.Item noStyle shouldUpdate={(prev, cur) => prev.receivedAt !== cur.receivedAt}>
+                {({ getFieldValue }) => {
+                  const received = getFieldValue("receivedAt");
+                  const timeStr = received ? dayjs(received).format("HH:mm:ss") : dayjs().format("HH:mm:ss");
+                  return (
+                    <div className="mb-4 text-[11px] font-mono text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1">
+                      <ClockCircleOutlined className="text-xs text-amber-700 dark:text-amber-400" />
+                      <span>Thời gian tạo: {timeStr}</span>
+                    </div>
+                  );
+                }}
               </Form.Item>
             </Col>
 

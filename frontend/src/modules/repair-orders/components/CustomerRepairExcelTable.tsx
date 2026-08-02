@@ -716,10 +716,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       <th className="p-1.5 border-r border-gray-200 dark:border-gray-700 w-24 min-w-[96px] text-center">
                         TRẠNG THÁI
                       </th>
-                      <th className="p-1.5 border-r border-gray-200 dark:border-gray-700 min-w-[120px]">
+                      <th className="p-1.5 border-r border-gray-200 dark:border-gray-700 min-w-[90px] sm:min-w-[100px]">
                         PHỤ KIỆN THAY THẾ
                       </th>
-                      <th className="p-1.5 border-r border-gray-200 dark:border-gray-700 w-32 min-w-[120px] text-center">
+                      <th className="p-1.5 border-r border-gray-200 dark:border-gray-700 w-44 min-w-[165px] text-center">
                         NGÀY TẠO
                       </th>
                       <th className="p-1.5 text-left min-w-[120px]">GHI CHÚ</th>
@@ -813,7 +813,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                         </form>
                       </td>
 
-                      <td className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top text-center">
+                      <td className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top text-center w-44 min-w-[165px]">
                         <DatePicker
                           value={
                             item.receivedAt
@@ -829,6 +829,19 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                           size="small"
                           className="w-full text-[10px] font-mono"
                         />
+                        <div className="text-[10px] font-mono text-gray-500 dark:text-gray-400 mt-1 text-center font-medium flex items-center justify-center gap-1">
+                          <ClockCircleOutlined className="text-[10px] text-amber-700 dark:text-amber-400" />
+                          <span>
+                            {
+                              (dayjs.isDayjs(item.receivedAt)
+                                ? item.receivedAt
+                                : item.receivedAt
+                                ? dayjs(item.receivedAt)
+                                : dayjs()
+                              ).format("HH:mm:ss")
+                            }
+                          </span>
+                        </div>
                       </td>
 
                       <td className="p-1.5 align-top">
@@ -1792,7 +1805,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           fullName: customer.fullName,
           productName: modalProductName.trim(),
           totalAmount: Number(modalTotalAmount) || 0,
-          receivedAt: toDateOnly(modalReceivedAt || dayjs()),
+          receivedAt: (modalReceivedAt || dayjs()).toISOString(),
           dueAt: toDateOnly(modalDueAt || dayjs().endOf("month")),
           status: modalStatus,
           note: modalNote.trim(),
@@ -2213,7 +2226,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           open={isAddModalOpen}
           onCancel={() => void handleCloseAddModal()}
           onOk={handleConfirmAddItem}
-          okText="Thêm vào cuối bảng"
+          okText="Thêm sản phẩm"
           cancelText="Hủy"
           okButtonProps={{
             className: "bg-primary hover:bg-primary-active font-bold border-none",
@@ -2221,7 +2234,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           }}
           cancelButtonProps={{ disabled: isCreatingItem }}
           closable={!isCreatingItem}
-          maskClosable={!isCreatingItem}
+          maskClosable={false}
           destroyOnClose
           centered
           width={520}
@@ -2307,8 +2320,12 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                   }}
                   format="DD/MM/YYYY"
                   allowClear={false}
-                  className="w-full rounded-md text-xs"
+                  className="w-full rounded-md text-xs font-mono"
                 />
+                <div className="mt-1 text-[11px] font-mono text-gray-500 dark:text-gray-400 font-medium flex items-center gap-1">
+                  <ClockCircleOutlined className="text-xs text-amber-700 dark:text-amber-400" />
+                  <span>Thời gian tạo: {modalReceivedAt ? modalReceivedAt.format("HH:mm:ss") : dayjs().format("HH:mm:ss")}</span>
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">Hẹn trả khách</label>
