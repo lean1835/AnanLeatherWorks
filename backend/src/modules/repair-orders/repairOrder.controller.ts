@@ -46,7 +46,7 @@ function sanitizeHeaderFilename(filename: string): string {
         .replace(/đ/g, 'd')
         .replace(/Đ/g, 'D')
         .replace(/[^\x20-\x7E]/g, '');
-    return ascii || 'Phieu-sua-AnanLeather-Works.pdf';
+    return ascii || 'Phieu-sua-Anan-Leather.pdf';
 }
 
 export const exportOrderPDF = catchAsync(async (req: AuthRequest, res: Response) => {

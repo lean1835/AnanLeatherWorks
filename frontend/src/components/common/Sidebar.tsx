@@ -88,7 +88,7 @@ export const Sidebar: React.FC = React.memo(() => {
       {/* Brand Header */}
       <div className="mb-6 px-2">
         <h1 className="font-serif text-lg font-extrabold text-primary dark:text-gray-100 tracking-tight leading-tight">
-          AnanLeather Works
+          Anan Leather
         </h1>
         <p className="text-[10px] text-gray-400 tracking-widest uppercase font-bold mt-0.5">WORKSHOP SYSTEM</p>
       </div>

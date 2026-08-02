@@ -1980,7 +1980,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
         const a = document.createElement("a");
         a.href = url;
         const safeName = (customer?.fullName || "Khach-hang").replace(/[\s/\\?%*:|"<>]/g, "-");
-        a.download = `Phieu-sua-${safeName}-AnanLeather-Works.pdf`;
+        a.download = `Phieu-sua-${safeName}-Anan-Leather.pdf`;
         document.body.appendChild(a);
         a.click();
         a.remove();

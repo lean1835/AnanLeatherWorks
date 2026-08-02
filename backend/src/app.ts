@@ -48,7 +48,7 @@ app.use(cookieParser(COOKIE_SECRET || undefined));
 app.use(trimRequest);
 
 app.get('/live', (_req, res) => {
-    res.status(200).json({ status: 'OK', message: 'AnanLeather Works API is running' });
+    res.status(200).json({ status: 'OK', message: 'Anan Leather API is running' });
 });
 
 // Readiness: giữ nguyên contract thành công cũ, nhưng trả 503 khi DB chưa sẵn sàng.
@@ -56,7 +56,7 @@ app.get('/health', (_req, res) => {
     const ready = mongoose.connection.readyState === 1;
     res.status(ready ? 200 : 503).json({
         status: ready ? 'OK' : 'NOT_READY',
-        message: ready ? 'AnanLeather Works API is running' : 'Database is not ready',
+        message: ready ? 'Anan Leather API is running' : 'Database is not ready',
     });
 });
 

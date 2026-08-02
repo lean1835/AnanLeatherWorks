@@ -47,11 +47,11 @@ export const LoginPage: React.FC = () => {
         <div className="text-center mb-6 sm:mb-8">
           <img
             src="/ananleather_logo.png"
-            alt="AnanLeather Works Logo"
+            alt="Anan Leather Logo"
             className="w-16 h-16 rounded-2xl mx-auto mb-3 object-cover shadow-md border border-gray-100 dark:border-gray-800"
           />
           <h1 className="font-serif text-xl sm:text-2xl font-bold text-primary tracking-tight uppercase">
-            ANANLEATHER WORKS
+            ANAN LEATHER
           </h1>
           <p className="text-xs text-on-surface-variant dark:text-gray-400 mt-1.5">
             Hệ thống Quản lý Tiếp nhận & Sửa chữa Đồ da
@@ -115,7 +115,7 @@ export const LoginPage: React.FC = () => {
         </Form>
 
         <div className="mt-8 text-center text-xs text-on-surface-variant border-t border-outline-variant dark:border-gray-800 pt-4">
-          Hệ thống bảo mật nội bộ dành cho nhân viên AnanLeather.
+          Hệ thống bảo mật nội bộ dành cho nhân viên Anan Leather.
         </div>
       </div>
     </div>

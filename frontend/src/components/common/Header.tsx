@@ -21,7 +21,7 @@ export const Header: React.FC = React.memo(() => {
   const handleLogoutConfirm = () => {
     Modal.confirm({
       title: "Đăng xuất tài khoản",
-      content: "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống AnanLeather Works?",
+      content: "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống Anan Leather?",
       okText: "Đăng xuất",
       cancelText: "Hủy",
       okButtonProps: { danger: true, className: "rounded-lg font-bold" },
@@ -68,12 +68,12 @@ export const Header: React.FC = React.memo(() => {
       <div className="flex items-center gap-3">
         <img
           src="/ananleather_logo.png"
-          alt="AnanLeather Works Logo"
+          alt="Anan Leather Logo"
           className="w-10 h-10 rounded-lg object-cover shadow-sm border border-gray-100 dark:border-gray-800"
         />
         <div>
           <div className="text-[10px] tracking-widest font-bold text-primary uppercase font-serif">
-            ANANLEATHER WORKS
+            ANAN LEATHER
           </div>
           <div className="text-sm font-bold text-on-surface dark:text-gray-100">Quản Lý Xưởng Sửa Chữa Đồ Da</div>
         </div>

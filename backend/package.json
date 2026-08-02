@@ -2,7 +2,7 @@
     "name": "ananleather-works-backend",
     "version": "1.0.0",
     "private": true,
-    "description": "Backend API for AnanLeather Works Repair Management System",
+    "description": "Backend API for Anan Leather Repair Management System",
     "main": "dist/server.js",
     "packageManager": "npm@10.9.7",
     "engines": {

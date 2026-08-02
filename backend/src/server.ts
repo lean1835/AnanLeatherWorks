@@ -23,7 +23,7 @@ async function bootstrap() {
         // Load HTTP routes only after configuration and DB readiness have succeeded.
         const { default: app } = await import('./app');
         httpServer = app.listen(PORT, () => {
-            logger.info(`🚀 AnanLeather Works Backend running on port ${PORT}`);
+            logger.info(`🚀 Anan Leather Backend running on port ${PORT}`);
         });
         httpServer.on('error', (error) => void shutdown('http-server-error', error));
     } catch (error) {
