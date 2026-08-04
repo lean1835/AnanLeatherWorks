@@ -2004,7 +2004,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     );
 
     return (
-      <div className="-mx-3 sm:-mx-6 md:-mx-6 bg-white dark:bg-surface-dark border-y border-gray-200 dark:border-gray-800 shadow-sm space-y-3 p-3 pb-0 sm:p-4 sm:pb-0 md:p-6 md:pb-0 w-auto">
+      <div className="-mx-3 sm:-mx-6 md:-mx-6 bg-white dark:bg-surface-dark border-y border-gray-200 dark:border-gray-800 shadow-sm space-y-3 p-3 sm:p-4 md:p-6 w-auto">
         {/* Spreadsheet Header Toolbar */}
         <div className="flex flex-col gap-2.5 pb-3 border-b border-gray-200 dark:border-gray-800 w-full">
           {/* Row 1: Customer Info (Left) + Action Buttons (Right) */}
@@ -2140,11 +2140,12 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                     : undefined
                 }
               >
-                <table className="w-full text-left text-xs border-collapse min-w-[340px] sm:min-w-[580px]">
-                  <thead className="sticky top-0 z-20 bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
+                {/* 1. Spreadsheet Header */}
+                <table className="w-full text-left text-xs border-collapse bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
+                  <thead>
                     <tr className="select-none uppercase tracking-wider text-xs font-black whitespace-nowrap align-top">
                       <th
-                        className="sticky left-0 top-0 z-30 w-8 min-w-[28px] whitespace-nowrap border-r border-borderLeather bg-primary-header px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink shadow-sm dark:border-gray-700 dark:bg-surface-dark-muted dark:text-amber-300"
+                        className="w-8 min-w-[28px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300"
                         title="Nhấn vào ô STT để xem chi tiết"
                       >
                         STT ▾
@@ -2164,34 +2165,44 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                       <th className="p-0 text-center whitespace-nowrap font-black text-primary-ink dark:text-amber-300 text-xs align-top w-7 min-w-[26px] max-w-[26px]"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                    {activeItems.map((item, idx) => {
-                      const rowKey = item._id || `new-${idx}`;
-                      return (
-                        <RepairTableRow
-                          key={rowKey}
-                          item={item}
-                          idx={idx}
-                          rowKey={rowKey}
-                          isExpanded={Boolean(expandedRowKeys[rowKey])}
-                          uploadingRowState={uploadingRowState}
-                          toggleRowExpand={toggleRowExpand}
-                          handleCellChange={handleCellChange}
-                          handleRowImageUpload={handleRowImageUpload}
-                          handleRemoveRowImage={handleRemoveRowImage}
-                          handleAddTaskTag={handleAddTaskTag}
-                          handleRemoveTaskTag={handleRemoveTaskTag}
-                          handleAddMaterialTag={handleAddMaterialTag}
-                          handleRemoveMaterialTag={handleRemoveMaterialTag}
-                          handleDeleteRow={handleDeleteRow}
-                          canUpdate={canUpdate}
-                          canDelete={canDelete}
-                          canUpload={canUpload}
-                        />
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="whitespace-nowrap border-t-2 border-gray-400 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table">
+                </table>
+
+                {/* 2. Scrollable Record Rows Container (Expanded fully to fit all records) */}
+                <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                      {activeItems.map((item, idx) => {
+                        const rowKey = item._id || `new-${idx}`;
+                        return (
+                          <RepairTableRow
+                            key={rowKey}
+                            item={item}
+                            idx={idx}
+                            rowKey={rowKey}
+                            isExpanded={Boolean(expandedRowKeys[rowKey])}
+                            uploadingRowState={uploadingRowState}
+                            toggleRowExpand={toggleRowExpand}
+                            handleCellChange={handleCellChange}
+                            handleRowImageUpload={handleRowImageUpload}
+                            handleRemoveRowImage={handleRemoveRowImage}
+                            handleAddTaskTag={handleAddTaskTag}
+                            handleRemoveTaskTag={handleRemoveTaskTag}
+                            handleAddMaterialTag={handleAddMaterialTag}
+                            handleRemoveMaterialTag={handleRemoveMaterialTag}
+                            handleDeleteRow={handleDeleteRow}
+                            canUpdate={canUpdate}
+                            canDelete={canDelete}
+                            canUpload={canUpload}
+                          />
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 3. Fixed Summary Footer */}
+                <table className="w-full text-left text-xs border-collapse border-t-2 border-gray-400 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table">
+                  <tfoot>
                     <tr className="whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table">
                       <td
                         colSpan={3}
