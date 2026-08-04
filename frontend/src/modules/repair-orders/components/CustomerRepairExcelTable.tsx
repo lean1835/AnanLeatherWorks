@@ -149,20 +149,22 @@ interface EditableTotalAmountInputProps {
 }
 
 const EditableTotalAmountInput: React.FC<EditableTotalAmountInputProps> = React.memo(({ value, onChange, disabled }) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const [displayValue, setDisplayValue] = useState("");
-
   const formatNumberOnly = (num: number): string => {
     if (!num) return "0";
     return `${num}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  const handleFocus = () => {
-    setIsFocused(true);
-    setDisplayValue(value ? formatNumberOnly(value) : "");
-  };
+  const [displayValue, setDisplayValue] = useState(() => formatNumberOnly(value || 0));
+  const isEditingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isEditingRef.current) {
+      setDisplayValue(formatNumberOnly(value || 0));
+    }
+  }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    isEditingRef.current = true;
     const rawDigits = e.target.value.replace(/[^\d]/g, "");
     if (!rawDigits) {
       setDisplayValue("");
@@ -175,23 +177,37 @@ const EditableTotalAmountInput: React.FC<EditableTotalAmountInputProps> = React.
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
+    isEditingRef.current = false;
+    setDisplayValue(formatNumberOnly(value || 0));
   };
 
-  const formattedText = formatVND(value || 0);
-
   return (
-    <Input
-      type="text"
-      inputMode="numeric"
-      pattern="[0-9]*"
-      value={isFocused ? displayValue : formattedText}
-      onFocus={handleFocus}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      disabled={disabled}
-      className="w-full text-right font-mono text-xs sm:text-sm font-extrabold tracking-tight text-warm-ink dark:text-amber-400 border-none bg-transparent p-0 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded-none cursor-pointer focus:cursor-text"
-    />
+    <div
+      className="flex items-center justify-end w-full gap-0.5 cursor-pointer"
+      onClick={(e) => {
+        const input = e.currentTarget.querySelector("input");
+        if (input && document.activeElement !== input) {
+          input.focus();
+        }
+      }}
+    >
+      <Input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={displayValue}
+        onChange={handleChange}
+        onFocus={() => {
+          isEditingRef.current = true;
+        }}
+        onBlur={handleBlur}
+        disabled={disabled}
+        className="w-full text-right font-mono text-xs sm:text-sm font-extrabold tracking-tight text-warm-ink dark:text-amber-400 border-none bg-transparent p-0 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded-none"
+      />
+      <span className="font-mono text-xs sm:text-sm font-extrabold text-warm-ink dark:text-amber-400 select-none shrink-0 pointer-events-none">
+        ₫
+      </span>
+    </div>
   );
 });
 
@@ -377,16 +393,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </div>
           </td>
 
-          <td
-            onClick={(e) => {
-              const target = e.target as HTMLElement;
-              if (target && !target.closest("label") && !target.closest(".ant-image-preview-group") && !target.closest(".ant-image")) {
-                const inputEl = e.currentTarget.querySelector("input");
-                inputEl?.focus();
-              }
-            }}
-            className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2 cursor-pointer"
-          >
+          <td className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2">
             <Input
               value={item.productName}
               onChange={(e) => handleCellChange(idx, "productName", e.target.value)}
@@ -664,31 +671,21 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </div>
           </td>
 
-          <td
-            onClick={(e) => {
-              const target = e.target as HTMLElement;
-              if (target && !target.closest("form") && !target.closest("button") && !target.closest("input")) {
-                const firstInput = e.currentTarget.querySelector("input");
-                firstInput?.focus();
-              }
-            }}
-            className="w-auto min-w-[110px] sm:min-w-[200px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top space-y-1 cursor-pointer"
-          >
+          <td className="w-auto min-w-[110px] sm:min-w-[200px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top space-y-1">
             <div className="space-y-0.5">
               {(item.tasks || []).map((taskName: string, tIdx: number) => (
                 <div
                   key={`task-${tIdx}`}
+                  className="group/task flex items-center justify-between text-xs text-warm-text dark:text-gray-200 cursor-pointer"
                   onClick={(e) => {
-                    const target = e.target as HTMLElement;
-                    if (target && !target.closest("button")) {
-                      const inputEl = e.currentTarget.querySelector("input");
-                      inputEl?.focus();
+                    const inputEl = e.currentTarget.querySelector("input");
+                    if (inputEl && document.activeElement !== inputEl) {
+                      inputEl.focus();
                     }
                   }}
-                  className="group/task flex items-center justify-between text-xs text-warm-text dark:text-gray-200 cursor-pointer"
                 >
                   <div className="flex items-center flex-1 min-w-0">
-                    <span className="leading-snug shrink-0 select-none mr-1">•</span>
+                    <span className="leading-snug shrink-0 select-none mr-1 pointer-events-none">•</span>
                     <Input
                       value={taskName}
                       onChange={(e) => {
@@ -704,12 +701,15 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       }}
                       disabled={!canUpdate}
                       placeholder="Nhập yêu cầu..."
-                      className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug cursor-pointer focus:cursor-text"
+                      className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug"
                     />
                   </div>
                   <button
                     type="button"
-                    onClick={() => void handleRemoveTaskTag(idx, taskName)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void handleRemoveTaskTag(idx, taskName);
+                    }}
                     disabled={!canUpdate}
                     className="text-red-500 opacity-0 group-hover/task:opacity-100 text-[10px] ml-1 px-1 hover:bg-red-50 rounded shrink-0"
                     title="Xóa việc"
@@ -747,13 +747,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </form>
           </td>
 
-          <td
-            onClick={(e) => {
-              const inputEl = e.currentTarget.querySelector("input");
-              inputEl?.focus();
-            }}
-            className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] p-1.5 sm:p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top cursor-pointer"
-          >
+          <td className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] p-1.5 sm:p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top">
             <EditableTotalAmountInput
               value={item.totalAmount ?? item.materialCost ?? 0}
               onChange={(val) => handleCellChange(idx, "totalAmount", val)}
@@ -858,31 +852,21 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                         />
                       </td>
 
-                      <td
-                        onClick={(e) => {
-                          const target = e.target as HTMLElement;
-                          if (target && !target.closest("form") && !target.closest("button") && !target.closest("input")) {
-                            const firstInput = e.currentTarget.querySelector("input");
-                            firstInput?.focus();
-                          }
-                        }}
-                        className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top space-y-1 cursor-pointer"
-                      >
+                      <td className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top space-y-1">
                         <div className="space-y-0.5">
                           {(item.replacementMaterials || []).map((matName: string, mIdx: number) => (
                             <div
                               key={`mat-${mIdx}`}
+                              className="group/mat flex items-center justify-between text-xs text-warm-text dark:text-gray-200 cursor-pointer"
                               onClick={(e) => {
-                                const target = e.target as HTMLElement;
-                                if (target && !target.closest("button")) {
-                                  const inputEl = e.currentTarget.querySelector("input");
-                                  inputEl?.focus();
+                                const inputEl = e.currentTarget.querySelector("input");
+                                if (inputEl && document.activeElement !== inputEl) {
+                                  inputEl.focus();
                                 }
                               }}
-                              className="group/mat flex items-center justify-between text-xs text-warm-text dark:text-gray-200 cursor-pointer"
                             >
                               <div className="flex items-center flex-1 min-w-0">
-                                <span className="leading-snug shrink-0 select-none mr-1">•</span>
+                                <span className="leading-snug shrink-0 select-none mr-1 pointer-events-none">•</span>
                                 <Input
                                   value={matName}
                                   onChange={(e) => {
@@ -898,12 +882,15 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                                   }}
                                   disabled={!canUpdate}
                                   placeholder="Nhập phụ kiện..."
-                                  className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug cursor-pointer focus:cursor-text"
+                                  className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug"
                                 />
                               </div>
                               <button
                                 type="button"
-                                onClick={() => void handleRemoveMaterialTag(idx, matName)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void handleRemoveMaterialTag(idx, matName);
+                                }}
                                 className="text-red-500 opacity-0 group-hover/mat:opacity-100 text-[10px] ml-1 px-1 hover:bg-red-50 rounded shrink-0"
                                 title="Xóa phụ kiện"
                                 disabled={!canUpdate}
@@ -1173,6 +1160,14 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
       let initialZoom = 100;
 
       const handleTouchStart = (e: TouchEvent) => {
+        if (
+          document.activeElement &&
+          (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") &&
+          document.activeElement !== e.target
+        ) {
+          (document.activeElement as HTMLElement).blur();
+        }
+
         if (e.touches.length === 2) {
           initialDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
@@ -1211,7 +1206,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
 
       el.addEventListener("wheel", handleWheel, { passive: false });
       el.addEventListener("touchstart", handleTouchStart, { passive: true });
-      el.addEventListener("touchmove", handleTouchMove, { passive: false });
+      el.addEventListener("touchmove", handleTouchMove, { passive: true });
       el.addEventListener("touchend", handleTouchEnd, { passive: true });
       el.addEventListener("focusin", handleFocusIn);
 
@@ -2260,7 +2255,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           ) : (
             <div
               ref={tableContainerRef}
-              className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative"
+              className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative touch-pan-x touch-pan-y"
             >
               <div
                 className="origin-top-left min-w-[340px] sm:min-w-[580px] w-full relative"
@@ -2312,7 +2307,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 </table>
 
                 {/* 2. Scrollable Record Rows Container (Expanded fully to fit all records) */}
-                <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full">
+                <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full touch-pan-x touch-pan-y">
                   <table className="w-full text-left text-xs border-collapse">
                     <colgroup>
                       <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
