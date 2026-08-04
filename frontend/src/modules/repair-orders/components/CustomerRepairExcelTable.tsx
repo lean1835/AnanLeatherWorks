@@ -394,12 +394,13 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
           </td>
 
           <td className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2">
-            <Input
+            <Input.TextArea
               value={item.productName}
               onChange={(e) => handleCellChange(idx, "productName", e.target.value)}
               placeholder="Tên sản phẩm..."
               disabled={!canUpdate}
-              className="w-full rounded border-none bg-transparent p-0 text-center text-xs font-bold text-warm-ink shadow-none focus:bg-white dark:text-gray-100 dark:focus:bg-gray-800"
+              autoSize={{ minRows: 1, maxRows: 4 }}
+              className="w-full rounded border-none bg-transparent p-0 text-center text-xs font-bold text-warm-ink shadow-none focus:bg-white dark:text-gray-100 dark:focus:bg-gray-800 resize-none whitespace-pre-wrap break-words leading-relaxed"
             />
 
             <div className="flex items-center justify-center gap-2 pt-1">
