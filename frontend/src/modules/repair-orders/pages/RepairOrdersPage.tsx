@@ -145,7 +145,7 @@ export const RepairOrdersPage = React.memo(() => {
   if (selectedCustomerGroup) {
     const { customer, orders = [] } = selectedCustomerGroup;
     return (
-      <div className="repair-orders-page pb-1 space-y-3 w-full">
+      <div className="repair-orders-page pb-20 md:pb-6 space-y-3 w-full">
         {/* Navigation Back Button Header */}
         <div className="flex items-center justify-between gap-3">
           <button

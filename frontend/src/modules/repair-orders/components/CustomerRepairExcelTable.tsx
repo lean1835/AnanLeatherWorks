@@ -2123,7 +2123,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           ) : (
             <div
               ref={tableContainerRef}
-              className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative mb-[68px] sm:mb-4"
+              className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative"
             >
               <div
                 className="origin-top-left min-w-[340px] sm:min-w-[580px] w-full relative"
@@ -2167,8 +2167,8 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                   </thead>
                 </table>
 
-                {/* 2. Scrollable Record Rows Container (Fits 9 full-size records) */}
-                <div className="overflow-y-auto max-h-[540px] sm:max-h-[580px] md:max-h-[620px] w-full">
+                {/* 2. Scrollable Record Rows Container (Expanded fully to fit all records) */}
+                <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full">
                   <table className="w-full text-left text-xs border-collapse">
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                       {activeItems.map((item, idx) => {
