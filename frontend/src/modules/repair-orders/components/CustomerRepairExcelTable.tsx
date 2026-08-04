@@ -377,7 +377,16 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </div>
           </td>
 
-          <td className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2">
+          <td
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (target && !target.closest("label") && !target.closest(".ant-image-preview-group") && !target.closest(".ant-image")) {
+                const inputEl = e.currentTarget.querySelector("input");
+                inputEl?.focus();
+              }
+            }}
+            className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2 cursor-pointer"
+          >
             <Input
               value={item.productName}
               onChange={(e) => handleCellChange(idx, "productName", e.target.value)}
@@ -655,12 +664,28 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </div>
           </td>
 
-          <td className="w-auto min-w-[110px] sm:min-w-[200px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top space-y-1">
+          <td
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (target && !target.closest("form") && !target.closest("button") && !target.closest("input")) {
+                const firstInput = e.currentTarget.querySelector("input");
+                firstInput?.focus();
+              }
+            }}
+            className="w-auto min-w-[110px] sm:min-w-[200px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top space-y-1 cursor-pointer"
+          >
             <div className="space-y-0.5">
               {(item.tasks || []).map((taskName: string, tIdx: number) => (
                 <div
                   key={`task-${tIdx}`}
-                  className="group/task flex items-center justify-between text-xs text-warm-text dark:text-gray-200"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    if (target && !target.closest("button")) {
+                      const inputEl = e.currentTarget.querySelector("input");
+                      inputEl?.focus();
+                    }
+                  }}
+                  className="group/task flex items-center justify-between text-xs text-warm-text dark:text-gray-200 cursor-pointer"
                 >
                   <div className="flex items-center flex-1 min-w-0">
                     <span className="leading-snug shrink-0 select-none mr-1">•</span>
@@ -679,7 +704,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       }}
                       disabled={!canUpdate}
                       placeholder="Nhập yêu cầu..."
-                      className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug"
+                      className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug cursor-pointer focus:cursor-text"
                     />
                   </div>
                   <button
@@ -722,7 +747,13 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </form>
           </td>
 
-          <td className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] p-1.5 sm:p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top">
+          <td
+            onClick={(e) => {
+              const inputEl = e.currentTarget.querySelector("input");
+              inputEl?.focus();
+            }}
+            className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] p-1.5 sm:p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top cursor-pointer"
+          >
             <EditableTotalAmountInput
               value={item.totalAmount ?? item.materialCost ?? 0}
               onChange={(val) => handleCellChange(idx, "totalAmount", val)}
@@ -827,12 +858,28 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                         />
                       </td>
 
-                      <td className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top space-y-1">
+                      <td
+                        onClick={(e) => {
+                          const target = e.target as HTMLElement;
+                          if (target && !target.closest("form") && !target.closest("button") && !target.closest("input")) {
+                            const firstInput = e.currentTarget.querySelector("input");
+                            firstInput?.focus();
+                          }
+                        }}
+                        className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top space-y-1 cursor-pointer"
+                      >
                         <div className="space-y-0.5">
                           {(item.replacementMaterials || []).map((matName: string, mIdx: number) => (
                             <div
                               key={`mat-${mIdx}`}
-                              className="group/mat flex items-center justify-between text-xs text-warm-text dark:text-gray-200"
+                              onClick={(e) => {
+                                const target = e.target as HTMLElement;
+                                if (target && !target.closest("button")) {
+                                  const inputEl = e.currentTarget.querySelector("input");
+                                  inputEl?.focus();
+                                }
+                              }}
+                              className="group/mat flex items-center justify-between text-xs text-warm-text dark:text-gray-200 cursor-pointer"
                             >
                               <div className="flex items-center flex-1 min-w-0">
                                 <span className="leading-snug shrink-0 select-none mr-1">•</span>
@@ -851,7 +898,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                                   }}
                                   disabled={!canUpdate}
                                   placeholder="Nhập phụ kiện..."
-                                  className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug"
+                                  className="w-full border-none bg-transparent p-0 text-xs text-warm-text dark:text-gray-200 shadow-none focus:bg-white dark:focus:bg-gray-800 rounded font-normal leading-snug cursor-pointer focus:cursor-text"
                                 />
                               </div>
                               <button
