@@ -343,7 +343,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
         <tr className={`${statusCfg.rowBg} transition-colors group`}>
           <td
             onClick={() => toggleRowExpand(rowKey)}
-            className={`w-8 min-w-[28px] sticky left-0 z-10 ${statusCfg.sttBg} p-2 text-center font-mono font-bold text-gray-800 dark:text-gray-100 text-xs border-r border-gray-300 dark:border-gray-700/80 shadow-sm transition-colors cursor-pointer select-none`}
+            className={`w-14 sm:w-16 min-w-[56px] sm:min-w-[64px] sticky left-0 z-10 ${statusCfg.sttBg} p-2 text-center font-mono font-bold text-gray-800 dark:text-gray-100 text-xs border-r border-gray-300 dark:border-gray-700/80 shadow-sm transition-colors cursor-pointer select-none`}
             title="Nhấn để mở/ẩn thông tin chi tiết (Trạng thái, Phụ kiện, Ngày nhận, Ghi chú)"
           >
             <div className="flex flex-col items-center justify-center gap-0.5">
@@ -2233,7 +2233,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 {/* 1. Spreadsheet Header */}
                 <table className="w-full text-left text-xs border-collapse bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
                   <colgroup>
-                    <col className="w-8 min-w-[28px]" />
+                    <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
                     <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
                     <col className="w-auto min-w-[110px] sm:min-w-[200px]" />
                     <col className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px]" />
@@ -2242,7 +2242,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                   <thead>
                     <tr className="select-none uppercase tracking-wider text-xs font-black whitespace-nowrap align-top">
                       <th
-                        className="w-8 min-w-[28px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300"
+                        className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300"
                         title="Nhấn vào ô STT để xem chi tiết"
                       >
                         STT ▾
@@ -2268,7 +2268,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full">
                   <table className="w-full text-left text-xs border-collapse">
                     <colgroup>
-                      <col className="w-8 min-w-[28px]" />
+                      <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
                       <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
                       <col className="w-auto min-w-[110px] sm:min-w-[200px]" />
                       <col className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px]" />
@@ -2307,7 +2307,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 {/* 3. Fixed Summary Footer */}
                 <table className="w-full text-left text-xs border-collapse border-t-2 border-gray-400 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table">
                   <colgroup>
-                    <col className="w-8 min-w-[28px]" />
+                    <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
                     <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
                     <col className="w-auto min-w-[110px] sm:min-w-[200px]" />
                     <col className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px]" />
