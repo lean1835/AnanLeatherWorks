@@ -239,6 +239,19 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
     const [afterPreviewState, setAfterPreviewState] = useState({ visible: false, current: 0 });
     const [isRemovingPreviewImage, setIsRemovingPreviewImage] = useState(false);
     const imageRemovalLockRef = useRef(false);
+    const expandedRowRef = useRef<HTMLTableRowElement | null>(null);
+
+    useEffect(() => {
+      if (isExpanded && expandedRowRef.current) {
+        const timer = setTimeout(() => {
+          expandedRowRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+          });
+        }, 120);
+        return () => clearTimeout(timer);
+      }
+    }, [isExpanded]);
 
     const rowTotal = Number(item.totalAmount) || Number(item.materialCost) || 0;
 
@@ -780,7 +793,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
         </tr>
 
         {isExpanded && (
-          <tr className="border-b-2 border-amber-300 bg-surface-warm dark:border-gray-700 dark:bg-surface-dark-muted">
+          <tr
+            ref={expandedRowRef}
+            className="border-b-2 border-amber-300 bg-surface-warm dark:border-gray-700 dark:bg-surface-dark-muted"
+          >
             <td colSpan={5} className="p-2 border-r border-amber-300 dark:border-gray-700">
               <div className="bg-white dark:bg-surface-dark rounded-lg border border-amber-300/80 dark:border-gray-700 shadow-md p-2 space-y-1.5 origin-top animate-accordion-down">
                 <div className="flex items-center justify-between border-b border-amber-200 dark:border-gray-700 pb-1 px-1">
