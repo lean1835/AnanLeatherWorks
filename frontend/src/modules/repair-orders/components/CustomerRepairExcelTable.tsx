@@ -2123,24 +2123,29 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           ) : (
             <div
               ref={tableContainerRef}
-              className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-135px)] md:max-h-[calc(100vh-160px)] border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full"
+              className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative mb-[68px] sm:mb-4"
             >
               <div
-                className="origin-top-left min-w-full relative"
-                style={{
-                  zoom: `${zoomLevel}%`,
-                  WebkitTransform: `scale(${zoomLevel / 100})`,
-                  WebkitTransformOrigin: "0 0",
-                  transform: `scale(${zoomLevel / 100})`,
-                  transformOrigin: "0 0",
-                  width: zoomLevel < 100 ? `${(100 / (zoomLevel / 100)).toFixed(2)}%` : "100%",
-                }}
+                className="origin-top-left min-w-[340px] sm:min-w-[580px] w-full relative"
+                style={
+                  zoomLevel !== 100
+                    ? {
+                        zoom: `${zoomLevel}%`,
+                        WebkitTransform: `scale(${zoomLevel / 100})`,
+                        WebkitTransformOrigin: "0 0",
+                        transform: `scale(${zoomLevel / 100})`,
+                        transformOrigin: "0 0",
+                        width: zoomLevel < 100 ? `${(100 / (zoomLevel / 100)).toFixed(2)}%` : "100%",
+                      }
+                    : undefined
+                }
               >
-                <table className="w-full text-left text-xs border-collapse min-w-[340px] sm:min-w-[580px]">
-                  <thead className="sticky top-0 z-20 bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
+                {/* 1. Spreadsheet Header */}
+                <table className="w-full text-left text-xs border-collapse bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
+                  <thead>
                     <tr className="select-none uppercase tracking-wider text-xs font-black whitespace-nowrap align-top">
                       <th
-                        className="sticky left-0 top-0 z-30 w-8 min-w-[28px] whitespace-nowrap border-r border-borderLeather bg-primary-header px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink shadow-sm dark:border-gray-700 dark:bg-surface-dark-muted dark:text-amber-300"
+                        className="w-8 min-w-[28px] whitespace-nowrap border-r border-borderLeather px-1 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300"
                         title="Nhấn vào ô STT để xem chi tiết"
                       >
                         STT ▾
@@ -2160,45 +2165,55 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                       <th className="p-0 text-center whitespace-nowrap font-black text-primary-ink dark:text-amber-300 text-xs align-top w-7 min-w-[26px] max-w-[26px]"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                    {activeItems.map((item, idx) => {
-                      const rowKey = item._id || `new-${idx}`;
-                      return (
-                        <RepairTableRow
-                          key={rowKey}
-                          item={item}
-                          idx={idx}
-                          rowKey={rowKey}
-                          isExpanded={Boolean(expandedRowKeys[rowKey])}
-                          uploadingRowState={uploadingRowState}
-                          toggleRowExpand={toggleRowExpand}
-                          handleCellChange={handleCellChange}
-                          handleRowImageUpload={handleRowImageUpload}
-                          handleRemoveRowImage={handleRemoveRowImage}
-                          handleAddTaskTag={handleAddTaskTag}
-                          handleRemoveTaskTag={handleRemoveTaskTag}
-                          handleAddMaterialTag={handleAddMaterialTag}
-                          handleRemoveMaterialTag={handleRemoveMaterialTag}
-                          handleDeleteRow={handleDeleteRow}
-                          canUpdate={canUpdate}
-                          canDelete={canDelete}
-                          canUpload={canUpload}
-                        />
-                      );
-                    })}
-                  </tbody>
-                  <tfoot className="sticky bottom-0 z-20 whitespace-nowrap border-t-2 border-gray-400 bg-primary-soft font-bold shadow-md dark:border-gray-600 dark:bg-surface-dark-table">
-                    <tr className="whitespace-nowrap">
+                </table>
+
+                {/* 2. Scrollable Record Rows Container (Fits 9 full-size records) */}
+                <div className="overflow-y-auto max-h-[540px] sm:max-h-[580px] md:max-h-[620px] w-full">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                      {activeItems.map((item, idx) => {
+                        const rowKey = item._id || `new-${idx}`;
+                        return (
+                          <RepairTableRow
+                            key={rowKey}
+                            item={item}
+                            idx={idx}
+                            rowKey={rowKey}
+                            isExpanded={Boolean(expandedRowKeys[rowKey])}
+                            uploadingRowState={uploadingRowState}
+                            toggleRowExpand={toggleRowExpand}
+                            handleCellChange={handleCellChange}
+                            handleRowImageUpload={handleRowImageUpload}
+                            handleRemoveRowImage={handleRemoveRowImage}
+                            handleAddTaskTag={handleAddTaskTag}
+                            handleRemoveTaskTag={handleRemoveTaskTag}
+                            handleAddMaterialTag={handleAddMaterialTag}
+                            handleRemoveMaterialTag={handleRemoveMaterialTag}
+                            handleDeleteRow={handleDeleteRow}
+                            canUpdate={canUpdate}
+                            canDelete={canDelete}
+                            canUpload={canUpload}
+                          />
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 3. Fixed Summary Footer */}
+                <table className="w-full text-left text-xs border-collapse border-t-2 border-gray-400 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table">
+                  <tfoot>
+                    <tr className="whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table">
                       <td
                         colSpan={3}
-                        className="p-2 text-right text-xs text-gray-900 dark:text-gray-100 font-extrabold uppercase whitespace-nowrap"
+                        className="p-2 text-right text-xs text-gray-900 dark:text-gray-100 font-extrabold uppercase whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table"
                       >
                         TỔNG CỘNG:
                       </td>
-                      <td className="w-20 sm:w-32 min-w-[72px] sm:min-w-[120px] whitespace-nowrap p-1.5 sm:p-2 text-right font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400">
+                      <td className="w-20 sm:w-32 min-w-[72px] sm:min-w-[120px] whitespace-nowrap p-1.5 sm:p-2 text-right font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400 bg-primary-soft dark:bg-surface-dark-table">
                         {formatVND(grandTotal)}
                       </td>
-                      <td colSpan={1} className="p-0 w-7 min-w-[26px] max-w-[26px]"></td>
+                      <td colSpan={1} className="p-0 w-7 min-w-[26px] max-w-[26px] bg-primary-soft dark:bg-surface-dark-table"></td>
                     </tr>
                   </tfoot>
                 </table>
