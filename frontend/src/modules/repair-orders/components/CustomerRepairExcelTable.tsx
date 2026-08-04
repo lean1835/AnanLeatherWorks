@@ -603,21 +603,32 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
           </td>
 
           <td className="p-2 border-r border-gray-200 dark:border-gray-700/80 align-top space-y-1">
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {uniqueTasks.map((t, tIdx) => {
                 const taskName = t;
                 return (
                   <div
-                    key={`${taskName}-${tIdx}`}
-                    className="group/task flex items-center justify-between text-xs text-warm-text dark:text-gray-200"
+                    key={`task-row-${item._id || idx}-${tIdx}`}
+                    className="group/task flex items-center justify-between text-xs text-warm-text dark:text-gray-200 gap-1 py-0.5 bg-transparent border-none"
                   >
-                    <span className="leading-snug">• {taskName}</span>
+                    <span className="text-[10px] text-gray-500 dark:text-gray-400 select-none">•</span>
+                    <Input
+                      value={taskName}
+                      onChange={(e) => {
+                        const nextTasks = [...uniqueTasks];
+                        nextTasks[tIdx] = e.target.value;
+                        handleCellChange(idx, "tasks", nextTasks);
+                      }}
+                      placeholder="Nhập yêu cầu..."
+                      disabled={!canUpdate}
+                      className="flex-1 min-w-0 border-none bg-transparent p-0 text-xs text-warm-text font-medium focus:bg-transparent hover:bg-transparent dark:text-gray-200 shadow-none cursor-text"
+                    />
                     <button
                       type="button"
                       onClick={() => void handleRemoveTaskTag(idx, t)}
                       disabled={!canUpdate}
-                      className="text-red-500 opacity-0 group-hover/task:opacity-100 text-[10px] ml-1 px-1 hover:bg-red-50 rounded"
-                      title="Xóa việc"
+                      className="text-red-500 opacity-0 group-hover/task:opacity-100 text-[10px] px-1 hover:bg-red-100/80 rounded transition-all cursor-pointer border-none bg-transparent shrink-0"
+                      title="Xóa công việc"
                     >
                       ✕
                     </button>
@@ -654,9 +665,16 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
           </td>
 
           <td className="w-20 sm:w-32 min-w-[72px] sm:min-w-[120px] p-1.5 sm:p-2 text-right border-r border-gray-200 dark:border-gray-700/80 align-top">
-            <div className="font-mono text-xs sm:text-sm font-extrabold tracking-tight text-warm-ink dark:text-amber-400">
-              {formatVND(rowTotal)}
-            </div>
+            <InputNumber
+              value={rowTotal}
+              onChange={(val) => handleCellChange(idx, "totalAmount", val ?? 0)}
+              formatter={(val) => (val !== undefined && val !== null ? `${val}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".") : "")}
+              parser={(val) => (val ? Number(val.replace(/\./g, "")) : 0)}
+              controls={false}
+              disabled={!canUpdate}
+              placeholder="0"
+              className="w-full text-right border-none bg-transparent p-0 font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400 shadow-none focus:bg-white dark:focus:bg-gray-800"
+            />
           </td>
 
           <td className="p-0 text-center align-middle whitespace-nowrap w-7 min-w-[26px] max-w-[26px]">
@@ -683,7 +701,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
         </tr>
 
         {isExpanded && (
-          <tr className="border-b-2 border-amber-300 bg-surface-warm dark:border-gray-700 dark:bg-surface-dark-muted">
+          <tr
+            id={`expanded-detail-row-${rowKey}`}
+            className="border-b-2 border-amber-300 bg-surface-warm dark:border-gray-700 dark:bg-surface-dark-muted"
+          >
             <td colSpan={5} className="p-2 border-r border-amber-300 dark:border-gray-700">
               <div className="bg-white dark:bg-surface-dark rounded-lg border border-amber-300/80 dark:border-gray-700 shadow-md p-2 space-y-1.5 origin-top animate-accordion-down">
                 <div className="flex items-center justify-between border-b border-amber-200 dark:border-gray-700 pb-1 px-1">
@@ -757,17 +778,28 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       </td>
 
                       <td className="p-1.5 border-r border-gray-200 dark:border-gray-700 align-top space-y-1">
-                        <div className="space-y-0.5">
+                        <div className="space-y-1">
                           {uniqueMaterials.map((mat: string, mIdx: number) => (
                             <div
-                              key={`${mat}-${mIdx}`}
-                              className="group/mat flex items-center justify-between text-xs text-warm-text dark:text-gray-200"
+                              key={`mat-row-${item._id || idx}-${mIdx}`}
+                              className="group/mat flex items-center justify-between text-xs text-warm-text dark:text-gray-200 gap-1 py-0.5 bg-transparent border-none"
                             >
-                              <span className="leading-snug">• {mat}</span>
+                              <span className="text-[10px] text-gray-500 dark:text-gray-400 select-none">•</span>
+                              <Input
+                                value={mat}
+                                onChange={(e) => {
+                                  const nextMaterials = [...uniqueMaterials];
+                                  nextMaterials[mIdx] = e.target.value;
+                                  handleCellChange(idx, "replacementMaterials", nextMaterials);
+                                }}
+                                placeholder="Nhập phụ kiện..."
+                                disabled={!canUpdate}
+                                className="flex-1 min-w-0 border-none bg-transparent p-0 text-xs text-warm-text font-medium focus:bg-transparent hover:bg-transparent dark:text-gray-200 shadow-none cursor-text"
+                              />
                               <button
                                 type="button"
                                 onClick={() => void handleRemoveMaterialTag(idx, mat)}
-                                className="text-red-500 opacity-0 group-hover/mat:opacity-100 text-[10px] ml-1 px-1 hover:bg-red-50 rounded"
+                                className="text-red-500 opacity-0 group-hover/mat:opacity-100 text-[10px] px-1 hover:bg-red-100/80 rounded transition-all cursor-pointer border-none bg-transparent shrink-0"
                                 title="Xóa phụ kiện"
                                 disabled={!canUpdate}
                               >
@@ -983,10 +1015,21 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string | number, boolean>>({});
 
     const toggleRowExpand = useCallback((rowKey: string | number) => {
-      setExpandedRowKeys((prev) => ({
-        ...prev,
-        [rowKey]: !prev[rowKey],
-      }));
+      setExpandedRowKeys((prev) => {
+        const nextExpandedState = !prev[rowKey];
+        if (nextExpandedState) {
+          setTimeout(() => {
+            const el = document.getElementById(`expanded-detail-row-${rowKey}`);
+            if (el) {
+              el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+            }
+          }, 80);
+        }
+        return {
+          ...prev,
+          [rowKey]: nextExpandedState,
+        };
+      });
     }, []);
 
     useEffect(() => {
@@ -2168,7 +2211,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 </table>
 
                 {/* 2. Scrollable Record Rows Container (Expanded fully to fit all records) */}
-                <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full">
+                <div className="overflow-y-auto max-h-[1000px] sm:max-h-[900px] md:max-h-[1000px] w-full">
                   <table className="w-full text-left text-xs border-collapse">
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                       {activeItems.map((item, idx) => {
