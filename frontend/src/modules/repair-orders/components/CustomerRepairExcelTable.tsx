@@ -1089,36 +1089,6 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     }, [updateZoomFast]);
 
     useEffect(() => {
-      if (!tableContainerRef.current) return;
-      const innerTable = tableContainerRef.current.firstElementChild as HTMLElement;
-      if (!innerTable) return;
-
-      const updateHeight = () => {
-        if (!tableContainerRef.current || !innerTable) return;
-        if (zoomLevel === 100) {
-          tableContainerRef.current.style.height = '';
-          return;
-        }
-        // Resize container to match scaled inner table to prevent white space
-        const rect = innerTable.getBoundingClientRect();
-        if (rect.height > 0) {
-          tableContainerRef.current.style.height = `${rect.height}px`;
-        }
-      };
-
-      updateHeight();
-      const observer = new ResizeObserver(updateHeight);
-      observer.observe(innerTable);
-
-      return () => {
-        observer.disconnect();
-        if (tableContainerRef.current) {
-          tableContainerRef.current.style.height = '';
-        }
-      };
-    }, [zoomLevel, items]);
-
-    useEffect(() => {
       const sortedOrders = [...orders].sort((a, b) => {
         if (a.isRollover && !b.isRollover) return -1;
         if (!a.isRollover && b.isRollover) return 1;
@@ -2153,7 +2123,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           ) : (
             <div
               ref={tableContainerRef}
-              className="overflow-x-auto overflow-y-hidden border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative"
+              className="overflow-x-auto border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-surface-dark w-full relative"
             >
               <div
                 className="origin-top-left min-w-[340px] sm:min-w-[580px] w-full relative"
