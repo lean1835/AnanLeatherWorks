@@ -402,13 +402,13 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             <div className="flex items-center justify-center gap-2 pt-1">
               {images.length === 0 ? (
                 <label
-                  className="flex h-10 w-10 sm:h-14 sm:w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
+                  className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
                   title="Tải ảnh sản phẩm"
                 >
                   {uploadingRowState?.rowIndex === idx ? (
                     <Spin size="small" />
                   ) : (
-                    <span className="text-[10px] font-medium leading-tight text-center px-1">
+                    <span className="text-xs font-medium leading-tight text-center px-1">
                       Chưa có
                       <br />
                       ảnh
@@ -502,7 +502,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       onClick={() => setPreviewState({ visible: true, current: 0 })}
                       className={
                         imgIdx === 0
-                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
+                          ? "w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
                           : "hidden"
                       }
                     >
@@ -2209,7 +2209,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 </div>
 
                 {/* 3. Fixed Summary Footer */}
-                <table className="w-full text-left text-xs border-collapse border-t-2 border-gray-400 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table">
+                <table className="w-full text-left text-xs border-collapse border-t-2 border-primary/40 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table mt-1">
                   <colgroup>
                     <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
                     <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
@@ -2221,11 +2221,11 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                     <tr className="whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table">
                       <td
                         colSpan={3}
-                        className="p-2 text-right text-xs text-gray-900 dark:text-gray-100 font-extrabold uppercase whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table"
+                        className="py-3.5 px-3 sm:py-4 sm:px-4 text-right text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-extrabold uppercase whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table"
                       >
                         TỔNG CỘNG:
                       </td>
-                      <td className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] whitespace-nowrap p-1.5 sm:p-2 text-right font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400 bg-primary-soft dark:bg-surface-dark-table">
+                      <td className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] whitespace-nowrap py-3.5 px-3 sm:py-4 sm:px-4 text-right font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400 bg-primary-soft dark:bg-surface-dark-table">
                         {formatVND(grandTotal)}
                       </td>
                       <td colSpan={1} className="p-0 w-7 min-w-[26px] max-w-[26px] bg-primary-soft dark:bg-surface-dark-table"></td>

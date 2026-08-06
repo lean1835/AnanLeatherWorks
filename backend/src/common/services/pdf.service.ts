@@ -244,7 +244,7 @@ export async function generateRepairOrderPDF(
                     .lineTo(endX, headerY + headerHeight)
                     .stroke();
 
-                const colDividers = [58, 194, 308, 408, 476];
+                const colDividers = [58, 194, 308, 408, 492];
                 doc.strokeColor('#E0D8D0').lineWidth(0.8);
                 for (const divX of colDividers) {
                     doc.moveTo(divX, headerY)
@@ -258,8 +258,8 @@ export async function generateRepairOrderPDF(
                 doc.font(fontBold).fontSize(8.5).fillColor('#30231E');
                 doc.text('YÊU CẦU SỬA CHỮA', 194, headerY + 14, { width: 114, align: 'center' });
                 doc.text('PHỤ KIỆN THAY THẾ', 308, headerY + 14, { width: 100, align: 'center' });
-                doc.text('TỔNG TIỀN', 408, headerY + 14, { width: 58, align: 'right' });
-                doc.text('GHI CHÚ', 484, headerY + 14, { width: 75.28 });
+                doc.text('TỔNG TIỀN', 408, headerY + 14, { width: 84, align: 'center' });
+                doc.text('GHI CHÚ', 498, headerY + 14, { width: 61.28 });
 
                 currentY += headerHeight;
                 const rawImgs = Array.isArray(order.images) ? order.images : [];
@@ -392,23 +392,23 @@ export async function generateRepairOrderPDF(
                     doc.text('—', 316, matY, { width: 84 });
                 }
 
-                // Col 5: TỔNG TIỀN (Top Aligned at currentY + 10, ends at 466pt)
+                // Col 5: TỔNG TIỀN (Centered between X=408 and X=492, width=84)
                 const amountY = currentY + 10;
                 const isInProgress = order.status === 'Đang sửa' || (order.status || '').toLowerCase().includes('đang sửa');
                 if (isInProgress) {
                     doc.font(fontBold).fontSize(10).fillColor('#30231E');
-                    doc.text('0đ', 408, amountY, { width: 58, align: 'right' });
+                    doc.text('0đ', 408, amountY, { width: 84, align: 'center' });
                     doc.font(fontRegular).fontSize(7).fillColor('#746A64');
-                    doc.text('(Chưa hoàn thành)', 408, amountY + 13, { width: 68, align: 'center' });
+                    doc.text('(Chưa hoàn thành)', 408, amountY + 13, { width: 84, align: 'center' });
                 } else {
                     doc.font(fontBold).fontSize(10).fillColor('#30231E');
-                    doc.text(formatVND(itemTotal), 408, amountY, { width: 58, align: 'right' });
+                    doc.text(formatVND(itemTotal), 408, amountY, { width: 84, align: 'center' });
                 }
 
-                // Col 6: GHI CHÚ (starts at 484pt -> 18pt gap from Col 5)
+                // Col 6: GHI CHÚ (starts at 498pt -> gap from Col 5)
                 const noteY = currentY + 10;
                 doc.font(fontRegular).fontSize(8.5).fillColor('#746A64');
-                doc.text(order.note || '—', 484, noteY, { width: 75.28 });
+                doc.text(order.note || '—', 498, noteY, { width: 61.28 });
 
                 currentY += rowHeight;
 
@@ -432,7 +432,7 @@ export async function generateRepairOrderPDF(
 
                 doc.strokeColor('#E0D8D0').lineWidth(0.8);
                 doc.moveTo(408, currentY).lineTo(408, currentY + totalRowHeight).stroke();
-                doc.moveTo(476, currentY).lineTo(476, currentY + totalRowHeight).stroke();
+                doc.moveTo(492, currentY).lineTo(492, currentY + totalRowHeight).stroke();
 
                 const summaryY = currentY + 9;
                 doc.font(fontBold).fontSize(9.5).fillColor('#1C1410');
@@ -440,7 +440,7 @@ export async function generateRepairOrderPDF(
 
                 const singleGrandTotal = isInProgress ? 0 : itemTotal;
                 doc.font(fontBold).fontSize(10).fillColor('#1C1410');
-                doc.text(formatVND(singleGrandTotal), 408, summaryY, { width: 58, align: 'right' });
+                doc.text(formatVND(singleGrandTotal), 408, summaryY, { width: 84, align: 'center' });
 
                 currentY += totalRowHeight;
 
@@ -690,7 +690,7 @@ export async function generateCustomerGroupPDF(
                 .lineTo(endX, headerY + headerHeight)
                 .stroke();
 
-            const groupColDividers = [58, 194, 308, 408, 476];
+            const groupColDividers = [58, 194, 308, 408, 492];
             doc.strokeColor('#E0D8D0').lineWidth(0.8);
             for (const divX of groupColDividers) {
                 doc.moveTo(divX, headerY)
@@ -704,8 +704,8 @@ export async function generateCustomerGroupPDF(
             doc.font(fontBold).fontSize(8.5).fillColor('#30231E');
             doc.text('YÊU CẦU SỬA CHỮA', 194, headerY + 14, { width: 114, align: 'center' });
             doc.text('PHỤ KIỆN THAY THẾ', 308, headerY + 14, { width: 100, align: 'center' });
-            doc.text('TỔNG TIỀN', 408, headerY + 14, { width: 58, align: 'right' });
-            doc.text('GHI CHÚ', 484, headerY + 14, { width: 75.28 });
+            doc.text('TỔNG TIỀN', 408, headerY + 14, { width: 84, align: 'center' });
+            doc.text('GHI CHÚ', 498, headerY + 14, { width: 61.28 });
 
             currentY += headerHeight;
 
@@ -833,23 +833,23 @@ export async function generateCustomerGroupPDF(
                     doc.text('—', 316, matY, { width: 84 });
                 }
 
-                // Col 5: TỔNG TIỀN (Top Aligned at currentY + 10, ends at 466pt)
+                // Col 5: TỔNG TIỀN (Centered between X=408 and X=492, width=84)
                 const amountY = currentY + 10;
                 const isItemInProgress = order.status === 'Đang sửa' || (order.status || '').toLowerCase().includes('đang sửa');
                 if (isItemInProgress) {
                     doc.font(fontBold).fontSize(10).fillColor('#30231E');
-                    doc.text('0đ', 408, amountY, { width: 58, align: 'right' });
+                    doc.text('0đ', 408, amountY, { width: 84, align: 'center' });
                     doc.font(fontRegular).fontSize(7).fillColor('#746A64');
-                    doc.text('(Chưa hoàn thành)', 408, amountY + 13, { width: 68, align: 'center' });
+                    doc.text('(Chưa hoàn thành)', 408, amountY + 13, { width: 84, align: 'center' });
                 } else {
                     doc.font(fontBold).fontSize(10).fillColor('#30231E');
-                    doc.text(formatVND(itemTotal), 408, amountY, { width: 58, align: 'right' });
+                    doc.text(formatVND(itemTotal), 408, amountY, { width: 84, align: 'center' });
                 }
 
-                // Col 6: GHI CHÚ (starts at 484pt -> 18pt gap from Col 5)
+                // Col 6: GHI CHÚ (starts at 498pt -> gap from Col 5)
                 const noteY = currentY + 10;
                 doc.font(fontRegular).fontSize(8.5).fillColor('#746A64');
-                doc.text(order.note || '—', 484, noteY, { width: 75.28 });
+                doc.text(order.note || '—', 498, noteY, { width: 61.28 });
 
                 currentY += rowHeight;
             });
@@ -881,7 +881,7 @@ export async function generateCustomerGroupPDF(
             doc.text('TỔNG CỘNG:', startX, summaryY, { width: 364, align: 'right' });
 
             doc.font(fontBold).fontSize(10).fillColor('#1C1410');
-            doc.text(formatVND(grandTotal), 408, summaryY, { width: 58, align: 'right' });
+            doc.text(formatVND(grandTotal), 408, summaryY, { width: 84, align: 'center' });
 
             currentY += totalRowHeight;
 
