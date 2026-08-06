@@ -25,15 +25,20 @@ export const login = catchAsync(async (req: Request, res: Response) => {
         recordSuccessfulLogin(ip, username);
 
         const maxAge = isRemember ? 90 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
-        const { token, ...dataWithoutToken } = result.data!;
-        res.cookie('token', token, {
+        res.cookie('token', result.data!.token, {
             ...authCookieOptions,
             maxAge,
         });
-        res.status(200).json({
-            ...result,
-            data: dataWithoutToken,
-        });
+
+        if (NODE_ENV === 'development') {
+            res.status(200).json(result);
+        } else {
+            const { token, ...dataWithoutToken } = result.data!;
+            res.status(200).json({
+                ...result,
+                data: dataWithoutToken,
+            });
+        }
     } catch (error) {
         recordFailedLogin(ip, username);
         throw error;
@@ -44,12 +49,16 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     const { username, password, displayName } = req.body;
     const result = await authService.register({ username, password, displayName });
 
-    const { token, ...dataWithoutToken } = result.data!;
-    res.cookie('token', token, authCookieOptions);
-    res.status(201).json({
-        ...result,
-        data: dataWithoutToken,
-    });
+    res.cookie('token', result.data!.token, authCookieOptions);
+    if (NODE_ENV === 'development') {
+        res.status(201).json(result);
+    } else {
+        const { token, ...dataWithoutToken } = result.data!;
+        res.status(201).json({
+            ...result,
+            data: dataWithoutToken,
+        });
+    }
 });
 
 export const logout = catchAsync(async (req: Request, res: Response) => {

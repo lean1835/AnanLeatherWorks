@@ -23,10 +23,30 @@ const allowedOrigins = new Set(
     CORS_ORIGINS.length > 0 ? CORS_ORIGINS : NODE_ENV === 'development' ? developmentOrigins : [],
 );
 
+function isAllowedDevelopmentOrigin(origin: string): boolean {
+    try {
+        const parsed = new URL(origin);
+        const hostname = parsed.hostname;
+        return (
+            hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname.endsWith('.local') ||
+            /^192\.168\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+            /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname) ||
+            /^172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(hostname)
+        );
+    } catch {
+        return false;
+    }
+}
+
 app.use(
     cors({
         origin(origin, callback) {
             if (!origin || allowedOrigins.has(origin)) return callback(null, true);
+            if (NODE_ENV === 'development' && isAllowedDevelopmentOrigin(origin)) {
+                return callback(null, true);
+            }
             return callback(new ApiError(403, 'Origin không được phép truy cập API.'));
         },
         credentials: true,
