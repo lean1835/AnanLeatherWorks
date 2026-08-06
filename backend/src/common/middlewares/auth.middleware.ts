@@ -16,12 +16,12 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     try {
         let token = req.signedCookies?.token || req.cookies?.token;
 
-        if (!token && NODE_ENV === 'development') {
-            if (req.headers.authorization?.startsWith('Bearer ')) {
-                token = req.headers.authorization.split(' ')[1];
-            } else if (typeof req.query.token === 'string' && req.query.token.trim()) {
-                token = req.query.token.trim();
-            }
+        if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        }
+
+        if (!token && typeof req.query.token === 'string' && req.query.token.trim()) {
+            token = req.query.token.trim();
         }
 
         if (!token) {

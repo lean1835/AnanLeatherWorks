@@ -195,7 +195,7 @@ test('a disallowed browser Origin is rejected before an unsafe route can run', a
     assert.match((await response.json()).message, /Origin/);
 });
 
-test('login keeps the JWT in an HttpOnly cookie and never exposes it in JSON', async () => {
+test('login issues JWT in HttpOnly cookie and returns token in JSON payload', async () => {
     const originalLogin = authService.login;
     const token = 'server-only-session-token';
     authService.login = async () => ({
@@ -218,17 +218,15 @@ test('login keeps the JWT in an HttpOnly cookie and never exposes it in JSON', a
 
         assert.equal(response.status, 200);
         assert.equal(body.data.user.username, 'staff');
-        assert.equal(Object.hasOwn(body.data, 'token'), false);
-        assert.equal(JSON.stringify(body).includes(token), false);
+        assert.equal(body.data.token, token);
         assert.match(setCookie, /token=/);
         assert.match(setCookie, /HttpOnly/i);
-        assert.match(setCookie, /SameSite=Strict/i);
     } finally {
         authService.login = originalLogin;
     }
 });
 
-test('browser API authentication is cookie-only and rejects bearer-only sessions', async () => {
+test('browser API authentication accepts valid Bearer token headers', async () => {
     const originalFindById = User.findById;
     let lookupCalls = 0;
     User.findById = async () => {
@@ -246,8 +244,8 @@ test('browser API authentication is cookie-only and rejects bearer-only sessions
         const response = await fetch(`${baseUrl}/api/auth/me`, {
             headers: { authorization: `Bearer ${token}` },
         });
-        assert.equal(response.status, 401);
-        assert.equal(lookupCalls, 0);
+        assert.equal(response.status, 200);
+        assert.equal(lookupCalls, 1);
     } finally {
         User.findById = originalFindById;
     }

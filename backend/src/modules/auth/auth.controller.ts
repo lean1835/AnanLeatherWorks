@@ -29,16 +29,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
             ...authCookieOptions,
             maxAge,
         });
-
-        if (NODE_ENV === 'development') {
-            res.status(200).json(result);
-        } else {
-            const { token, ...dataWithoutToken } = result.data!;
-            res.status(200).json({
-                ...result,
-                data: dataWithoutToken,
-            });
-        }
+        res.status(200).json(result);
     } catch (error) {
         recordFailedLogin(ip, username);
         throw error;
@@ -50,15 +41,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     const result = await authService.register({ username, password, displayName });
 
     res.cookie('token', result.data!.token, authCookieOptions);
-    if (NODE_ENV === 'development') {
-        res.status(201).json(result);
-    } else {
-        const { token, ...dataWithoutToken } = result.data!;
-        res.status(201).json({
-            ...result,
-            data: dataWithoutToken,
-        });
-    }
+    res.status(201).json(result);
 });
 
 export const logout = catchAsync(async (req: Request, res: Response) => {
