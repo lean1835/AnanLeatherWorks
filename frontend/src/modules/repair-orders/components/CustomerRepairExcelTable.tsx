@@ -389,7 +389,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             </div>
           </td>
 
-          <td className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] p-2 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2">
+          <td className="w-64 sm:w-80 min-w-[240px] sm:min-w-[280px] p-2.5 border-r border-gray-200 dark:border-gray-700/80 align-top text-center space-y-2">
             <Input.TextArea
               value={item.productName}
               onChange={(e) => handleCellChange(idx, "productName", e.target.value)}
@@ -402,13 +402,13 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             <div className="flex items-center justify-center gap-2 pt-1">
               {images.length === 0 ? (
                 <label
-                  className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
+                  className="flex h-24 w-24 sm:h-28 sm:w-28 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
                   title="Tải ảnh sản phẩm"
                 >
                   {uploadingRowState?.rowIndex === idx ? (
                     <Spin size="small" />
                   ) : (
-                    <span className="text-xs font-medium leading-tight text-center px-1">
+                    <span className="text-xs font-semibold leading-tight text-center px-1">
                       Chưa có
                       <br />
                       ảnh
@@ -502,7 +502,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       onClick={() => setPreviewState({ visible: true, current: 0 })}
                       className={
                         imgIdx === 0
-                          ? "w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
+                          ? "w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border-2 border-amber-400 dark:border-amber-700 shadow-md relative group/img bg-black shrink-0 cursor-pointer select-none"
                           : "hidden"
                       }
                     >
@@ -2141,9 +2141,9 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 <table className="w-full text-left text-xs border-collapse bg-primary-header dark:bg-surface-dark-muted text-primary-ink dark:text-amber-300 font-black border-b-2 border-primary dark:border-amber-500 shadow-sm">
                   <colgroup>
                     <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
-                    <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
-                    <col className="w-auto min-w-[110px] sm:min-w-[200px]" />
-                    <col className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px]" />
+                    <col className="w-64 sm:w-80 min-w-[240px] sm:min-w-[280px]" />
+                    <col className="w-auto min-w-[140px] sm:min-w-[220px]" />
+                    <col className="w-28 sm:w-44 min-w-[110px] sm:min-w-[165px]" />
                     <col className="w-7 min-w-[26px] max-w-[26px]" />
                   </colgroup>
                   <thead>
@@ -2154,13 +2154,13 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                       >
                         STT ▾
                       </th>
-                      <th className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] whitespace-nowrap border-r border-borderLeather px-1.5 py-2.5 text-center align-middle text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-64 sm:w-80 min-w-[240px] sm:min-w-[280px] whitespace-nowrap border-r border-borderLeather px-1.5 py-2.5 text-center align-middle text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         SẢN PHẨM
                       </th>
-                      <th className="w-auto min-w-[110px] sm:min-w-[200px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-auto min-w-[140px] sm:min-w-[220px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         YÊU CẦU SỬA CHỮA
                       </th>
-                      <th className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-right align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                      <th className="w-28 sm:w-44 min-w-[110px] sm:min-w-[165px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-right align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         TỔNG TIỀN
                       </th>
                       <th className="p-0 text-center whitespace-nowrap font-black text-primary-ink dark:text-amber-300 text-xs align-top w-7 min-w-[26px] max-w-[26px]"></th>
@@ -2169,13 +2169,13 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                 </table>
 
                 {/* 2. Scrollable Record Rows Container (Expanded fully to fit all records) */}
-                <div className="overflow-y-auto max-h-[800px] sm:max-h-[900px] md:max-h-[1000px] w-full touch-pan-x touch-pan-y">
+                <div className="overflow-y-auto max-h-[850px] sm:max-h-[950px] md:max-h-[1050px] w-full touch-pan-x touch-pan-y">
                   <table className="w-full text-left text-xs border-collapse">
                     <colgroup>
                       <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
-                      <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
-                      <col className="w-auto min-w-[110px] sm:min-w-[200px]" />
-                      <col className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px]" />
+                      <col className="w-64 sm:w-80 min-w-[240px] sm:min-w-[280px]" />
+                      <col className="w-auto min-w-[140px] sm:min-w-[220px]" />
+                      <col className="w-28 sm:w-44 min-w-[110px] sm:min-w-[165px]" />
                       <col className="w-7 min-w-[26px] max-w-[26px]" />
                     </colgroup>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -2208,27 +2208,27 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                   </table>
                 </div>
 
-                {/* 3. Fixed Summary Footer */}
-                <table className="w-full text-left text-xs border-collapse border-t-2 border-primary/40 bg-primary-soft font-bold dark:border-gray-600 dark:bg-surface-dark-table mt-1">
+                {/* 3. Fixed Summary Footer (Shifted down with generous padding & top margin) */}
+                <table className="w-full text-left text-xs border-collapse border-t-4 border-amber-500/60 bg-amber-50/90 font-bold dark:border-amber-600/80 dark:bg-surface-dark-table mt-4 sm:mt-6 shadow-sm">
                   <colgroup>
                     <col className="w-14 sm:w-16 min-w-[56px] sm:min-w-[64px]" />
-                    <col className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px]" />
-                    <col className="w-auto min-w-[110px] sm:min-w-[200px]" />
-                    <col className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px]" />
+                    <col className="w-64 sm:w-80 min-w-[240px] sm:min-w-[280px]" />
+                    <col className="w-auto min-w-[140px] sm:min-w-[220px]" />
+                    <col className="w-28 sm:w-44 min-w-[110px] sm:min-w-[165px]" />
                     <col className="w-7 min-w-[26px] max-w-[26px]" />
                   </colgroup>
                   <tfoot>
-                    <tr className="whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table">
+                    <tr className="whitespace-nowrap bg-amber-50/90 dark:bg-surface-dark-table">
                       <td
                         colSpan={3}
-                        className="py-3.5 px-3 sm:py-4 sm:px-4 text-right text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-extrabold uppercase whitespace-nowrap bg-primary-soft dark:bg-surface-dark-table"
+                        className="py-4 px-4 sm:py-5 sm:px-6 text-right text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-black uppercase whitespace-nowrap"
                       >
                         TỔNG CỘNG:
                       </td>
-                      <td className="w-28 sm:w-44 min-w-[100px] sm:min-w-[165px] whitespace-nowrap py-3.5 px-3 sm:py-4 sm:px-4 text-right font-mono text-xs sm:text-sm font-black text-warm-ink dark:text-amber-400 bg-primary-soft dark:bg-surface-dark-table">
+                      <td className="w-28 sm:w-44 min-w-[110px] sm:min-w-[165px] whitespace-nowrap py-4 px-4 sm:py-5 sm:px-6 text-right font-mono text-sm sm:text-base font-black text-amber-950 dark:text-amber-400">
                         {formatVND(grandTotal)}
                       </td>
-                      <td colSpan={1} className="p-0 w-7 min-w-[26px] max-w-[26px] bg-primary-soft dark:bg-surface-dark-table"></td>
+                      <td colSpan={1} className="p-0 w-7 min-w-[26px] max-w-[26px]"></td>
                     </tr>
                   </tfoot>
                 </table>
