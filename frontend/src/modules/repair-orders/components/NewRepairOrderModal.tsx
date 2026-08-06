@@ -87,7 +87,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
   const canCreateOrder = hasPermission(PERMISSIONS.REPAIR_ORDERS.CREATE);
   const [phone, setPhone] = useState("");
   const [isExistingCustomer, setIsExistingCustomer] = useState(false);
-  const [beforeImages, setBeforeImages] = useState<ImageDraft[]>([]);
+  const [images, setImages] = useState<ImageDraft[]>([]);
   const [tasks, setTasks] = useState<TaskDraft[]>([{ id: "1", name: "Sơn lại viền quai xách" }]);
   const [error, setError] = useState("");
   const imagesRef = useRef<ImageDraft[]>([]);
@@ -100,8 +100,8 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
   const [deleteTemporaryImage] = useDeleteUnreferencedRepairImageMutation();
 
   useEffect(() => {
-    imagesRef.current = beforeImages;
-  }, [beforeImages]);
+    imagesRef.current = images;
+  }, [images]);
 
   useEffect(
     () => () => {
@@ -168,7 +168,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, name: value } : t)));
   };
 
-  const handleSelectBeforeImage = (file: File) => {
+  const handleSelectImage = (file: File) => {
     if (!canUploadImages) {
       message.error("Bạn không có quyền tải ảnh.");
       return Upload.LIST_IGNORE;
@@ -182,7 +182,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
       return Upload.LIST_IGNORE;
     }
 
-    setBeforeImages((current) => {
+    setImages((current) => {
       if (current.length >= MAX_IMAGE_COUNT) {
         message.warning(`Chỉ được chọn tối đa ${MAX_IMAGE_COUNT} ảnh.`);
         return current;
@@ -193,7 +193,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
   };
 
   const handleRemoveImage = (index: number) => {
-    setBeforeImages((prev) => {
+    setImages((prev) => {
       const target = prev[index];
       if (target) URL.revokeObjectURL(target.previewUrl);
       return prev.filter((_, i) => i !== index);
@@ -215,7 +215,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
     }
     imagesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
     imagesRef.current = [];
-    setBeforeImages([]);
+    setImages([]);
     form.resetFields();
     onClose();
   };
@@ -228,8 +228,8 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
     }
     try {
       const values = await form.validateFields();
-      if (beforeImages.length === 0) {
-        setError("Vui lòng tải lên ít nhất 1 ảnh trước khi sửa (Hình chụp hiện trạng)");
+      if (images.length === 0) {
+        setError("Vui lòng tải lên ít nhất 1 ảnh sản phẩm");
         return;
       }
 
@@ -240,11 +240,10 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
       }
 
       const uploadResults = await Promise.allSettled(
-        beforeImages.map(async (image) => {
+        images.map(async (image) => {
           if (image.objectKey) return image;
           const formData = new FormData();
           formData.append("image", image.file);
-          formData.append("stage", "before");
           const response = await uploadImage({ formData }).unwrap();
           const data = response.data;
           if (!data.objectKey) throw new Error("Máy chủ không trả về mã ảnh hợp lệ.");
@@ -255,9 +254,9 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
         }),
       );
       const uploadedImages = uploadResults.map((result, index) =>
-        result.status === "fulfilled" ? result.value : beforeImages[index],
+        result.status === "fulfilled" ? result.value : images[index],
       );
-      setBeforeImages(uploadedImages);
+      setImages(uploadedImages);
       imagesRef.current = uploadedImages;
       const failedUpload = uploadResults.find((result) => result.status === "rejected");
       if (failedUpload?.status === "rejected") throw failedUpload.reason;
@@ -272,7 +271,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
         note: trimmed.note || "",
         totalAmount: Number(trimmed.totalAmount) || 0,
         tasks: tasks.filter((t) => t.name.trim() !== "").map((t) => t.name.trim()),
-        beforeImages: uploadedImages
+        images: uploadedImages
           .map((image) => image.objectKey)
           .filter((objectKey): objectKey is string => Boolean(objectKey)),
       };
@@ -502,27 +501,27 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
 
         {/* Card 3: Images */}
         <Card
-          title="3. Hình ảnh Hiện trạng Sản phẩm (Bắt buộc ít nhất 1 ảnh)"
+          title="3. Hình ảnh Sản phẩm (Bắt buộc ít nhất 1 ảnh)"
           size="small"
           className="mb-4 rounded-xl border-outline-variant"
         >
-          <Upload beforeUpload={handleSelectBeforeImage} showUploadList={false} accept="image/*" multiple>
+          <Upload beforeUpload={handleSelectImage} showUploadList={false} accept="image/*" multiple>
             <Button
               icon={<UploadOutlined />}
-              disabled={!canUploadImages || submitting || uploadingImage || beforeImages.length >= MAX_IMAGE_COUNT}
+              disabled={!canUploadImages || submitting || uploadingImage || images.length >= MAX_IMAGE_COUNT}
               className="rounded-lg font-bold bg-surface-container-high border-outline-variant text-xs"
             >
-              Chụp / Chọn ảnh trước khi sửa
+              Chụp / Chọn ảnh sản phẩm
             </Button>
           </Upload>
 
           <div className="flex flex-wrap gap-3 mt-3">
-            {beforeImages.map((img, idx) => (
+            {images.map((img, idx) => (
               <div
                 key={idx}
                 className="relative w-20 h-20 rounded-lg overflow-hidden border border-outline-variant bg-surface-container"
               >
-                <img src={img.previewUrl} alt="Before" className="w-full h-full object-cover" />
+                <img src={img.previewUrl} alt="Product" className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => handleRemoveImage(idx)}
@@ -533,7 +532,7 @@ export const NewRepairOrderModal: React.FC<NewRepairOrderModalProps> = ({
               </div>
             ))}
 
-            {beforeImages.length === 0 && (
+            {images.length === 0 && (
               <div className="w-full p-4 border border-dashed border-outline-variant rounded-xl text-center text-xs text-on-surface-variant flex items-center justify-center gap-2">
                 <FileImageOutlined /> Chưa có ảnh nào được chọn.
               </div>

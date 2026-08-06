@@ -407,17 +407,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigateToRepair
         </Col>
 
         <Col xs={12} sm={6}>
-          <div className="rounded-xl border border-red-200 dark:border-red-950/50 bg-red-50/30 dark:bg-red-950/10 p-3 sm:p-4 shadow-sm hover:border-red-300 transition-all">
+          <div className="rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/40 dark:bg-amber-950/20 p-3 sm:p-4 shadow-sm hover:border-amber-300 transition-all">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-[10px] uppercase font-bold text-red-700 dark:text-red-300 tracking-wider">
-                  Đã hủy
+                <div className="text-[10px] uppercase font-bold text-amber-700 dark:text-amber-300 tracking-wider">
+                  Tổng khách hàng
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-red-800 dark:text-red-200 mt-0.5 sm:mt-1">
-                  {stats.cancelled}
+                <div className="text-xl sm:text-2xl font-bold text-amber-800 dark:text-amber-200 mt-0.5 sm:mt-1">
+                  {stats.totalCustomers || 0}
                 </div>
               </div>
-              <CloseCircleOutlined className="text-xl sm:text-2xl text-red-500/40" />
+              <UserOutlined className="text-xl sm:text-2xl text-amber-500/80" />
             </div>
           </div>
         </Col>

@@ -19,14 +19,10 @@ const RepairOrderSchema: Schema = new Schema(
         },
         status: {
             type: String,
-            enum: ['Đang sửa', 'Hoàn thành', 'Đã hủy'],
+            enum: ['Đang sửa', 'Hoàn thành', 'Đã thanh toán'],
             default: 'Đang sửa',
         },
-        beforeImages: {
-            type: [{ type: String }],
-            default: [],
-        },
-        afterImages: {
+        images: {
             type: [{ type: String }],
             default: [],
         },
@@ -35,11 +31,16 @@ const RepairOrderSchema: Schema = new Schema(
         note: { type: String, default: '', trim: true },
         totalAmount: { type: Number, default: 0, min: 0 },
         completedAt: { type: Date },
+        deletedAt: { type: Date, default: null },
     },
     { timestamps: { createdAt: 'createdAt', updatedAt: 'updatedAt' } },
 );
 
 RepairOrderSchema.index({ customerId: 1, createdAt: -1 }, { name: 'idx_repairOrder_customerId_createdAt' });
 RepairOrderSchema.index({ status: 1, dueAt: 1 }, { name: 'idx_repairOrder_status_dueAt' });
+RepairOrderSchema.index(
+    { deletedAt: 1 },
+    { expireAfterSeconds: 2592000, name: 'idx_repairOrder_deletedAt_ttl', background: true },
+);
 
 export default mongoose.model<IRepairOrder>('RepairOrder', RepairOrderSchema);

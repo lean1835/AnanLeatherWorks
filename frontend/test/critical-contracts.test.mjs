@@ -98,12 +98,9 @@ test("image preview stays open while a compact delete confirmation owns the mobi
   assert.equal(source.includes("pendingImageRemoval"), false);
   assert.match(source, /<Popconfirm/);
   assert.match(source, /title="Xóa ảnh này\?"/);
-  assert.match(source, /visible: beforePreviewState\.visible/);
-  assert.match(source, /visible: afterPreviewState\.visible/);
-  assert.match(source, /onConfirm=\{\(\) => handlePreviewImageRemoval\("before", currentImg, current\)\}/);
-  assert.match(source, /onConfirm=\{\(\) => handlePreviewImageRemoval\("after", currentImg, current\)\}/);
-  assert.match(source, /await flushOrderUpdate\(orderId, \{ \[field\]: updatedImageList \}\);/);
-  assert.match(source, /clearLocalOverrideField\(orderId, field, updatedImageList\);/);
-  assert.match(source, /aria-label="Xóa ảnh trước đang xem"/);
-  assert.match(source, /aria-label="Xóa ảnh sau đang xem"/);
+  assert.match(source, /visible: previewState\.visible/);
+  assert.match(source, /onConfirm=\{\(\) => handlePreviewImageRemoval\(currentImg, current\)\}/);
+  assert.match(source, /await flushOrderUpdate\(orderId, \{ images: updatedImageList \}\);/);
+  assert.match(source, /clearLocalOverrideField\(orderId, "images", updatedImageList\);/);
+  assert.match(source, /aria-label="Xóa ảnh đang xem"/);
 });

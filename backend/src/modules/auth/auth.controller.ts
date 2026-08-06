@@ -25,11 +25,15 @@ export const login = catchAsync(async (req: Request, res: Response) => {
         recordSuccessfulLogin(ip, username);
 
         const maxAge = isRemember ? 90 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
-        res.cookie('token', result.data!.token, {
+        const { token, ...dataWithoutToken } = result.data!;
+        res.cookie('token', token, {
             ...authCookieOptions,
             maxAge,
         });
-        res.status(200).json(result);
+        res.status(200).json({
+            ...result,
+            data: dataWithoutToken,
+        });
     } catch (error) {
         recordFailedLogin(ip, username);
         throw error;
@@ -40,8 +44,12 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     const { username, password, displayName } = req.body;
     const result = await authService.register({ username, password, displayName });
 
-    res.cookie('token', result.data!.token, authCookieOptions);
-    res.status(201).json(result);
+    const { token, ...dataWithoutToken } = result.data!;
+    res.cookie('token', token, authCookieOptions);
+    res.status(201).json({
+        ...result,
+        data: dataWithoutToken,
+    });
 });
 
 export const logout = catchAsync(async (req: Request, res: Response) => {

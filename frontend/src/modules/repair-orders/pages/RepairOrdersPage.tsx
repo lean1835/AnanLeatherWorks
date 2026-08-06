@@ -1,14 +1,17 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Alert, Button, Select, Tag } from "antd";
-import { ArrowLeftOutlined, CalendarOutlined, UsergroupAddOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, CalendarOutlined, UsergroupAddOutlined, RestOutlined } from "@ant-design/icons";
 import { useParams, useNavigate } from "react-router-dom";
+import { Badge } from "antd";
 
 import {
   useDeleteRepairOrderMutation,
   useGetOrdersByCustomerGroupQuery,
   useUpdateRepairOrderMutation,
+  useGetTrashOrdersQuery,
   repairOrderApi,
 } from "../services/repairOrderApi";
+import { TrashModal } from "../components/TrashModal";
 import FilterCard from "../../../components/ui/FilterCard";
 import DebouncedSearchInput from "../../../components/ui/DebouncedSearchInput";
 import CustomerRepairExcelTable from "../components/CustomerRepairExcelTable";
@@ -33,6 +36,10 @@ export const RepairOrdersPage = React.memo(() => {
   const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [selectedYear, setSelectedYear] = useState<number>(currentYear);
   const [search, setSearch] = useState<string>("");
+  const [isTrashOpen, setIsTrashOpen] = useState(false);
+
+  const { data: trashData } = useGetTrashOrdersQuery(undefined);
+  const trashCount = trashData?.data?.length || 0;
 
   const queryArgs = useMemo(
     () => ({
@@ -176,10 +183,29 @@ export const RepairOrdersPage = React.memo(() => {
   return (
     <div className="repair-orders-page pb-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-1 mb-6">
-        <h1 className="font-serif text-2xl font-bold text-gray-900 dark:text-gray-100 m-0 tracking-tight">
+      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        <h1 className="font-serif text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100 m-0 tracking-tight">
           Quản lý Sửa chữa Đồ da
         </h1>
+
+        {/* Trash Can Button in Page Header */}
+        <button
+          type="button"
+          onClick={() => setIsTrashOpen(true)}
+          className="relative w-9 h-9 flex items-center justify-center bg-gray-200/90 hover:bg-gray-300 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl border border-gray-300/80 dark:border-gray-700 shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
+          title="Thùng rác (Lịch sử phiếu đã xóa)"
+          aria-label="Thùng rác (Lịch sử phiếu đã xóa)"
+        >
+          <RestOutlined className="text-base text-gray-900 dark:text-gray-100 font-bold" />
+          {trashCount > 0 && (
+            <Badge
+              count={trashCount}
+              overflowCount={99}
+              size="small"
+              className="absolute -top-1.5 -right-1.5"
+            />
+          )}
+        </button>
       </div>
 
       {/* Filter Card */}
@@ -248,7 +274,7 @@ export const RepairOrdersPage = React.memo(() => {
           <div className="grid grid-cols-1 gap-3">
             {customerGroups.map((group) => {
               const { customer, orders = [] } = group;
-              const validOrders = orders.filter((order) => order.status !== ORDER_STATUS.CANCELLED);
+              const validOrders = orders;
               const validTotalAmount = validOrders.reduce(
                 (total, order) => total + (Number(order.totalAmount) || 0),
                 0,
@@ -293,6 +319,8 @@ export const RepairOrdersPage = React.memo(() => {
           </div>
         </div>
       )}
+
+      <TrashModal open={isTrashOpen} onClose={() => setIsTrashOpen(false)} />
     </div>
   );
 });

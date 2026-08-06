@@ -1,7 +1,13 @@
 import mongoose from 'mongoose';
 import type { Server } from 'http';
 import { ENABLE_DEV_SEED, MONGODB_URI, NODE_ENV, PORT, validateEnvironment } from '@config/environment';
-import { migrateLegacyStatuses, seedInitialData } from '@common/services/seed.service';
+import {
+    migrateLegacyCancelledOrders,
+    migrateLegacyImageFields,
+    migrateLegacyStatuses,
+    seedInitialData,
+} from '@common/services/seed.service';
+import { repairOrderService } from '@modules/repair-orders/repairOrder.service';
 import { logger } from '@common/utils/logger';
 
 let httpServer: Server | undefined;
@@ -15,6 +21,11 @@ async function bootstrap() {
         logger.info('✅ MongoDB Database connected successfully.');
 
         await migrateLegacyStatuses();
+        await migrateLegacyImageFields();
+        await migrateLegacyCancelledOrders();
+        await repairOrderService.purgeExpiredTrashOrders().catch((err) => {
+            logger.error('Failed to auto-purge expired trash orders:', err);
+        });
 
         if (NODE_ENV !== 'production' && ENABLE_DEV_SEED) {
             await seedInitialData();

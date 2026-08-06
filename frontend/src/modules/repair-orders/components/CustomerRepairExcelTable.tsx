@@ -31,6 +31,7 @@ import {
   CalendarOutlined,
   DownOutlined,
   RightOutlined,
+  RestOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import type { Customer, RepairImage, RepairOrder, OrderStatus } from "../../../types";
@@ -41,7 +42,10 @@ import {
   useCreateRepairOrderMutation,
   useDownloadCustomerRepairPdfMutation,
   useDeleteUnreferencedRepairImageMutation,
+  useGetTrashOrdersQuery,
 } from "../services/repairOrderApi";
+import { TrashModal } from "./TrashModal";
+import { Badge } from "antd";
 import {
   getRepairImagePreviewStateAfterRemoval,
   getRepairImageReference,
@@ -81,19 +85,18 @@ const STATUS_CONFIG: Record<
     rowBg: "bg-blue-200/90 dark:bg-blue-900/80 hover:bg-blue-300/90 dark:hover:bg-blue-800/90",
     sttBg: "bg-blue-300/95 dark:bg-blue-800/90 text-blue-950 font-black group-hover:bg-blue-400/90",
   },
-  [ORDER_STATUS.CANCELLED]: {
-    label: "Đã hủy",
-    bg: "bg-red-100 dark:bg-red-900/70",
-    text: "text-red-800 dark:text-red-200",
-    border: "border-red-300 dark:border-red-700",
-    icon: <CloseCircleOutlined className="text-[10px]" />,
-    rowBg: "bg-red-200/90 dark:bg-red-900/80 hover:bg-red-300/90 dark:hover:bg-red-800/90",
-    sttBg: "bg-red-300/95 dark:bg-red-800/90 group-hover:bg-red-400/90",
+  [ORDER_STATUS.PAID]: {
+    label: "Đã thanh toán",
+    bg: "bg-rose-100 dark:bg-rose-900/70",
+    text: "text-rose-800 dark:text-rose-200 font-extrabold",
+    border: "border-rose-400 dark:border-rose-600",
+    icon: <CheckCircleOutlined className="text-[10px] text-rose-700 dark:text-rose-300" />,
+    rowBg: "bg-rose-100/80 dark:bg-rose-950/40 hover:bg-rose-200/60 dark:hover:bg-rose-900/60",
+    sttBg: "bg-rose-200/90 dark:bg-rose-900/80 text-rose-950 font-black group-hover:bg-rose-300/90",
   },
 };
 
 type CalendarValue = Parameters<typeof toDateOnly>[0];
-type RepairImageStage = "before" | "after";
 
 const isCalendarValue = (value: unknown): value is CalendarValue =>
   typeof value === "string" || typeof value === "number" || value instanceof Date || dayjs.isDayjs(value);
@@ -109,8 +112,7 @@ interface EditableRepairOrderRow {
   note: string;
   tasks: string[];
   replacementMaterials: string[];
-  beforeImages: RepairImage[];
-  afterImages: RepairImage[];
+  images: RepairImage[];
   orderMonth?: number;
   orderYear?: number;
   isRollover: boolean;
@@ -127,11 +129,11 @@ interface RepairTableRowProps {
   idx: number;
   rowKey: string | number;
   isExpanded: boolean;
-  uploadingRowState: { rowIndex: number; stage: "before" | "after" } | null;
+  uploadingRowState: { rowIndex: number } | null;
   toggleRowExpand: (rowKey: string | number) => void;
   handleCellChange: (idx: number, field: keyof RepairOrderUpdateBody, value: unknown) => void;
-  handleRowImageUpload: (idx: number, stage: RepairImageStage, e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleRemoveRowImage: (orderId: string, img: RepairImage, stage: RepairImageStage) => Promise<boolean>;
+  handleRowImageUpload: (idx: number, e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemoveRowImage: (orderId: string, img: RepairImage) => Promise<boolean>;
   handleAddTaskTag: (idx: number, val: string) => Promise<boolean>;
   handleRemoveTaskTag: (idx: number, task: string) => Promise<void>;
   handleAddMaterialTag: (idx: number, val: string) => Promise<boolean>;
@@ -235,8 +237,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
     const [materialInput, setMaterialInput] = useState("");
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [isAddingMaterial, setIsAddingMaterial] = useState(false);
-    const [beforePreviewState, setBeforePreviewState] = useState({ visible: false, current: 0 });
-    const [afterPreviewState, setAfterPreviewState] = useState({ visible: false, current: 0 });
+    const [previewState, setPreviewState] = useState({ visible: false, current: 0 });
     const [isRemovingPreviewImage, setIsRemovingPreviewImage] = useState(false);
     const imageRemovalLockRef = useRef(false);
     const expandedRowRef = useRef<HTMLTableRowElement | null>(null);
@@ -255,37 +256,22 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
 
     const rowTotal = Number(item.totalAmount) || Number(item.materialCost) || 0;
 
-    const beforeImages = useMemo(() => {
-      return ((item.beforeImages || []) as RepairImage[]).filter((image) => getRepairImageReference(image));
-    }, [item.beforeImages]);
-
-    const afterImages = useMemo(() => {
-      return ((item.afterImages || []) as RepairImage[]).filter((image) => getRepairImageReference(image));
-    }, [item.afterImages]);
+    const images = useMemo(() => {
+      const raw = (item.images || []) as RepairImage[];
+      return raw.filter((image) => getRepairImageReference(image));
+    }, [item.images]);
 
     useEffect(() => {
-      setBeforePreviewState((currentState) => {
+      setPreviewState((currentState) => {
         const nextState = {
-          visible: currentState.visible && beforeImages.length > 0,
-          current: Math.min(currentState.current, Math.max(0, beforeImages.length - 1)),
+          visible: currentState.visible && images.length > 0,
+          current: Math.min(currentState.current, Math.max(0, images.length - 1)),
         };
         return nextState.visible === currentState.visible && nextState.current === currentState.current
           ? currentState
           : nextState;
       });
-    }, [beforeImages.length]);
-
-    useEffect(() => {
-      setAfterPreviewState((currentState) => {
-        const nextState = {
-          visible: currentState.visible && afterImages.length > 0,
-          current: Math.min(currentState.current, Math.max(0, afterImages.length - 1)),
-        };
-        return nextState.visible === currentState.visible && nextState.current === currentState.current
-          ? currentState
-          : nextState;
-      });
-    }, [afterImages.length]);
+    }, [images.length]);
 
     const uniqueTasks = useMemo(() => {
       return Array.from(new Set((item.tasks || []).map((t: string) => (t || "").trim()).filter(Boolean))) as string[];
@@ -330,33 +316,30 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
     }, [handleAddMaterialTag, idx, isAddingMaterial, materialInput]);
 
     const handlePreviewImageRemoval = useCallback(
-      async (stage: RepairImageStage, image: RepairImage, currentIndex: number): Promise<boolean> => {
+      async (image: RepairImage, currentIndex: number): Promise<boolean> => {
         if (imageRemovalLockRef.current) return false;
         imageRemovalLockRef.current = true;
         setIsRemovingPreviewImage(true);
 
-        const currentImages = stage === "before" ? beforeImages : afterImages;
-        const setPreviewState = stage === "before" ? setBeforePreviewState : setAfterPreviewState;
-
         try {
-          const remainingImages = removeRepairImageReference(currentImages, image);
-          if (remainingImages.length === currentImages.length) {
-            return await handleRemoveRowImage(item._id, image, stage);
+          const remainingImages = removeRepairImageReference(images, image);
+          if (remainingImages.length === images.length) {
+            return await handleRemoveRowImage(item._id, image);
           }
 
           setPreviewState(getRepairImagePreviewStateAfterRemoval(currentIndex, remainingImages.length));
-          const wasRemoved = await handleRemoveRowImage(item._id, image, stage);
+          const wasRemoved = await handleRemoveRowImage(item._id, image);
           if (!wasRemoved) {
             setPreviewState({
               visible: true,
-              current: Math.min(Math.max(currentIndex, 0), Math.max(0, currentImages.length - 1)),
+              current: Math.min(Math.max(currentIndex, 0), Math.max(0, images.length - 1)),
             });
           }
           return wasRemoved;
         } catch (error) {
           setPreviewState({
             visible: true,
-            current: Math.min(Math.max(currentIndex, 0), Math.max(0, currentImages.length - 1)),
+            current: Math.min(Math.max(currentIndex, 0), Math.max(0, images.length - 1)),
           });
           throw error;
         } finally {
@@ -364,7 +347,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
           setIsRemovingPreviewImage(false);
         }
       },
-      [afterImages, beforeImages, handleRemoveRowImage, item._id],
+      [images, handleRemoveRowImage, item._id],
     );
 
     return (
@@ -417,12 +400,12 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
             />
 
             <div className="flex items-center justify-center gap-2 pt-1">
-              {beforeImages.length === 0 ? (
+              {images.length === 0 ? (
                 <label
                   className="flex h-10 w-10 sm:h-14 sm:w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-amber-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
-                  title="Tải ảnh trước"
+                  title="Tải ảnh sản phẩm"
                 >
-                  {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "before" ? (
+                  {uploadingRowState?.rowIndex === idx ? (
                     <Spin size="small" />
                   ) : (
                     <span className="text-[10px] font-medium leading-tight text-center px-1">
@@ -435,30 +418,30 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                     type="file"
                     accept="image/*"
                     disabled={!canUpdate || !canUpload || Boolean(uploadingRowState)}
-                    onChange={(e) => handleRowImageUpload(idx, "before", e)}
+                    onChange={(e) => handleRowImageUpload(idx, e)}
                     className="hidden"
                   />
                 </label>
               ) : (
                 <Image.PreviewGroup
                   preview={{
-                    visible: beforePreviewState.visible,
-                    current: beforePreviewState.current,
+                    visible: previewState.visible,
+                    current: previewState.current,
                     onVisibleChange: (visible) =>
-                      setBeforePreviewState((currentState) => ({
+                      setPreviewState((currentState) => ({
                         visible,
                         current: visible ? 0 : currentState.current,
                       })),
-                    onChange: (current) => setBeforePreviewState((currentState) => ({ ...currentState, current })),
+                    onChange: (current) => setPreviewState((currentState) => ({ ...currentState, current })),
                     toolbarRender: (originalNode, { current }) => {
-                      const currentImg = beforeImages[current];
+                      const currentImg = images[current];
                       return (
                         <>
                           <label
                             className="fixed top-4 left-4 z-[30000] text-amber-300 hover:text-white bg-black/80 hover:bg-black/95 border border-amber-500/40 px-3 py-1.5 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-1.5 cursor-pointer pointer-events-auto transition-all text-xs font-bold select-none"
-                            title="Thêm ảnh trước mới"
+                            title="Thêm ảnh sản phẩm mới"
                           >
-                            {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "before" ? (
+                            {uploadingRowState?.rowIndex === idx ? (
                               <>
                                 <Spin size="small" />
                                 <span>Đang tải...</span>
@@ -473,7 +456,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                               type="file"
                               accept="image/*"
                               disabled={!canUpdate || !canUpload || Boolean(uploadingRowState)}
-                              onChange={(e) => handleRowImageUpload(idx, "before", e)}
+                              onChange={(e) => handleRowImageUpload(idx, e)}
                               className="hidden"
                             />
                           </label>
@@ -491,7 +474,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                                 getPopupContainer={() => document.body}
                                 rootClassName="repair-image-delete-popconfirm"
                                 disabled={isRemovingPreviewImage}
-                                onConfirm={() => handlePreviewImageRemoval("before", currentImg, current)}
+                                onConfirm={() => handlePreviewImageRemoval(currentImg, current)}
                               >
                                 <button
                                   type="button"
@@ -500,8 +483,8 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                                   onPointerDown={(e) => e.stopPropagation()}
                                   className="text-red-400 hover:text-red-300 w-8 h-8 flex items-center justify-center bg-red-950/90 hover:bg-red-900 border border-red-800/80 rounded-full transition-all shadow-md cursor-pointer ml-2 shrink-0 pointer-events-auto touch-manipulation"
                                   title="Xóa ảnh"
-                                  aria-label="Xóa ảnh trước đang xem"
-                                  data-testid="repair-image-delete-before"
+                                  aria-label="Xóa ảnh đang xem"
+                                  data-testid="repair-image-delete"
                                 >
                                   <DeleteOutlined className="text-sm" />
                                 </button>
@@ -513,10 +496,10 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                     },
                   }}
                 >
-                  {beforeImages.map((img, imgIdx) => (
+                  {images.map((img, imgIdx) => (
                     <div
                       key={getRepairImageReference(img) || imgIdx}
-                      onClick={() => setBeforePreviewState({ visible: true, current: 0 })}
+                      onClick={() => setPreviewState({ visible: true, current: 0 })}
                       className={
                         imgIdx === 0
                           ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
@@ -525,7 +508,7 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                     >
                       <Image
                         src={resolveRepairImageUrl(img)}
-                        alt="Trước"
+                        alt="Ảnh"
                         loading="lazy"
                         placeholder={
                           <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
@@ -535,147 +518,14 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                         wrapperClassName="!w-full !h-full !block overflow-hidden"
                         className="!w-full !h-full !object-cover cursor-pointer"
                       />
-                      {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "before" && (
+                      {uploadingRowState?.rowIndex === idx && (
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20 rounded-md">
                           <Spin size="small" />
                         </div>
                       )}
-                      {imgIdx === 0 && beforeImages.length > 1 && (
+                      {imgIdx === 0 && images.length > 1 && (
                         <span className="absolute bottom-0 right-0 bg-amber-600/95 text-white text-[9px] font-extrabold px-1 rounded-tl shadow-sm pointer-events-none z-10">
-                          +{beforeImages.length - 1}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </Image.PreviewGroup>
-              )}
-
-              {afterImages.length === 0 ? (
-                <label
-                  className="flex h-10 w-10 sm:h-14 sm:w-14 shrink-0 cursor-pointer select-none flex-col items-center justify-center rounded-md border border-dashed border-gray-300 bg-surface-warm-muted text-warm-muted shadow-sm transition-all hover:bg-emerald-100/60 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400"
-                  title="Tải ảnh sau"
-                >
-                  {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "after" ? (
-                    <Spin size="small" />
-                  ) : (
-                    <span className="text-[10px] font-medium leading-tight text-center px-1">
-                      Chưa có
-                      <br />
-                      ảnh
-                    </span>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={!canUpdate || !canUpload || Boolean(uploadingRowState)}
-                    onChange={(e) => handleRowImageUpload(idx, "after", e)}
-                    className="hidden"
-                  />
-                </label>
-              ) : (
-                <Image.PreviewGroup
-                  preview={{
-                    visible: afterPreviewState.visible,
-                    current: afterPreviewState.current,
-                    onVisibleChange: (visible) =>
-                      setAfterPreviewState((currentState) => ({
-                        visible,
-                        current: visible ? 0 : currentState.current,
-                      })),
-                    onChange: (current) => setAfterPreviewState((currentState) => ({ ...currentState, current })),
-                    toolbarRender: (originalNode, { current }) => {
-                      const currentImg = afterImages[current];
-                      return (
-                        <>
-                          <label
-                            className="fixed top-4 left-4 z-[30000] text-emerald-300 hover:text-white bg-black/80 hover:bg-black/95 border border-emerald-500/40 px-3 py-1.5 rounded-full backdrop-blur-md shadow-2xl flex items-center gap-1.5 cursor-pointer pointer-events-auto transition-all text-xs font-bold select-none"
-                            title="Thêm ảnh sau mới"
-                          >
-                            {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "after" ? (
-                              <>
-                                <Spin size="small" />
-                                <span>Đang tải...</span>
-                              </>
-                            ) : (
-                              <>
-                                <PlusOutlined className="text-sm text-emerald-400" />
-                                <span>Thêm ảnh</span>
-                              </>
-                            )}
-                            <input
-                              type="file"
-                              accept="image/*"
-                              disabled={!canUpdate || !canUpload || Boolean(uploadingRowState)}
-                              onChange={(e) => handleRowImageUpload(idx, "after", e)}
-                              className="hidden"
-                            />
-                          </label>
-                          <div className="flex items-center gap-4 bg-black/85 px-6 py-2 rounded-full backdrop-blur-md shadow-2xl border border-white/15 max-w-[95vw] mx-auto [&_.ant-image-preview-operations]:!flex [&_.ant-image-preview-operations]:!items-center [&_.ant-image-preview-operations]:!m-0 [&_.ant-image-preview-operations]:!p-0 [&_.ant-image-preview-operations-operation]:!ml-4 [&_.ant-image-preview-operations-operation]:!mr-0 [&_.ant-image-preview-operations-operation]:!px-1">
-                            {originalNode}
-                            {currentImg && canUpdate && (
-                              <Popconfirm
-                                title="Xóa ảnh này?"
-                                okText="Xóa"
-                                cancelText="Hủy"
-                                okButtonProps={{ danger: true }}
-                                placement="topRight"
-                                trigger="click"
-                                zIndex={30000}
-                                getPopupContainer={() => document.body}
-                                rootClassName="repair-image-delete-popconfirm"
-                                disabled={isRemovingPreviewImage}
-                                onConfirm={() => handlePreviewImageRemoval("after", currentImg, current)}
-                              >
-                                <button
-                                  type="button"
-                                  disabled={isRemovingPreviewImage}
-                                  onClick={(e) => e.stopPropagation()}
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  className="text-red-400 hover:text-red-300 w-8 h-8 flex items-center justify-center bg-red-950/90 hover:bg-red-900 border border-red-800/80 rounded-full transition-all shadow-md cursor-pointer ml-2 shrink-0 pointer-events-auto touch-manipulation"
-                                  title="Xóa ảnh"
-                                  aria-label="Xóa ảnh sau đang xem"
-                                  data-testid="repair-image-delete-after"
-                                >
-                                  <DeleteOutlined className="text-sm" />
-                                </button>
-                              </Popconfirm>
-                            )}
-                          </div>
-                        </>
-                      );
-                    },
-                  }}
-                >
-                  {afterImages.map((img, imgIdx) => (
-                    <div
-                      key={getRepairImageReference(img) || imgIdx}
-                      onClick={() => setAfterPreviewState({ visible: true, current: 0 })}
-                      className={
-                        imgIdx === 0
-                          ? "w-10 h-10 sm:w-14 sm:h-14 rounded-md overflow-hidden border-2 border-emerald-500 dark:border-emerald-600 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
-                          : "hidden"
-                      }
-                    >
-                      <Image
-                        src={resolveRepairImageUrl(img)}
-                        alt="Sau"
-                        loading="lazy"
-                        placeholder={
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
-                            <Spin size="small" />
-                          </div>
-                        }
-                        wrapperClassName="!w-full !h-full !block overflow-hidden"
-                        className="!w-full !h-full !object-cover cursor-pointer"
-                      />
-                      {uploadingRowState?.rowIndex === idx && uploadingRowState?.stage === "after" && (
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20 rounded-md">
-                          <Spin size="small" />
-                        </div>
-                      )}
-                      {imgIdx === 0 && afterImages.length > 1 && (
-                        <span className="absolute bottom-0 right-0 bg-emerald-700/95 text-white text-[9px] font-extrabold px-1 rounded-tl shadow-sm pointer-events-none z-10">
-                          +{afterImages.length - 1}
+                          +{images.length - 1}
                         </span>
                       )}
                     </div>
@@ -1020,8 +870,7 @@ interface RepairOrderUpdateBody {
   status?: OrderStatus;
   replacementMaterials?: string[];
   tasks?: string[];
-  beforeImages?: RepairImage[];
-  afterImages?: RepairImage[];
+  images?: RepairImage[];
 }
 
 const areOrderFieldValuesEqual = (
@@ -1033,7 +882,11 @@ const areOrderFieldValuesEqual = (
     return toDateOnly(serverValue as Parameters<typeof toDateOnly>[0]) === toDateOnly(localValue as string);
   }
 
-  if (field === "beforeImages" || field === "afterImages" || field === "replacementMaterials" || field === "tasks") {
+  if (
+    field === "images" ||
+    field === "replacementMaterials" ||
+    field === "tasks"
+  ) {
     return JSON.stringify(serverValue || []) === JSON.stringify(localValue || []);
   }
 
@@ -1117,10 +970,10 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     const [createRepairOrder] = useCreateRepairOrderMutation();
     const [downloadCustomerRepairPdf] = useDownloadCustomerRepairPdfMutation();
     const [deleteTemporaryImage] = useDeleteUnreferencedRepairImageMutation();
-    const [uploadingRowState, setUploadingRowState] = useState<{ rowIndex: number; stage: "before" | "after" } | null>(
-      null,
-    );
-
+    const { data: trashData } = useGetTrashOrdersQuery(undefined);
+    const trashCount = trashData?.data?.length || 0;
+    const [isTrashOpen, setIsTrashOpen] = useState(false);
+    const [uploadingRowState, setUploadingRowState] = useState<{ rowIndex: number } | null>(null);
     const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string | number, boolean>>({});
 
     const toggleRowExpand = useCallback((rowKey: string | number) => {
@@ -1255,12 +1108,11 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
             : selectedMonth && selectedYear
               ? dayjs(`${selectedYear}-${selectedMonth}-01`).endOf("month")
               : dayjs().endOf("month"),
-          status: ((ord.status as string) === "Mới nhận" ? ORDER_STATUS.IN_PROGRESS : ord.status) || ORDER_STATUS.IN_PROGRESS,
+          status: ord.status || ORDER_STATUS.IN_PROGRESS,
           note: ord.note || "",
           tasks: ord.tasks || [],
           replacementMaterials: ord.replacementMaterials || [],
-          beforeImages: Array.isArray(ord.beforeImages) ? ord.beforeImages : [],
-          afterImages: Array.isArray(ord.afterImages) ? ord.afterImages : [],
+          images: Array.isArray(ord.images) ? ord.images : [],
           orderMonth: ord.orderMonth || selectedMonth,
           orderYear: ord.orderYear || selectedYear,
           isRollover: Boolean(ord.isRollover),
@@ -1289,7 +1141,11 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
             pendingForOrder && Object.prototype.hasOwnProperty.call(pendingForOrder, field),
           );
           const isOrderSaving = Boolean(orderSaveChainsRef.current[ord._id]);
-          if (areOrderFieldValuesEqual(field, serverItem[field], localValue) && !isFieldPending && !isOrderSaving) {
+          if (
+            areOrderFieldValuesEqual(field, (serverItem as Record<string, unknown>)[field], localValue) &&
+            !isFieldPending &&
+            !isOrderSaving
+          ) {
             return;
           }
 
@@ -1510,7 +1366,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     }, []);
 
     const handleRowImageUpload = useCallback(
-      async (rowIdx: number, stage: "before" | "after", e: React.ChangeEvent<HTMLInputElement>) => {
+      async (rowIdx: number, e: React.ChangeEvent<HTMLInputElement>) => {
         if (!canUpdate || !canUpload) {
           message.error("Bạn không có quyền cập nhật phiếu sửa.");
           e.target.value = "";
@@ -1538,12 +1394,10 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
         const targetItem = activeItems[rowIdx];
         if (!targetItem?._id) return;
 
-        const field = stage === "before" ? "beforeImages" : "afterImages";
-        const currentImgs = targetItem?.[field] || [];
-        const stageCount = currentImgs.length;
+        const currentImgs = (targetItem.images || []) as RepairImage[];
 
-        if (stageCount >= 10) {
-          message.warning(`Mỗi đơn chỉ được tải tối đa 10 ảnh ${stage === "before" ? "trước" : "sau"} khi sửa.`);
+        if (currentImgs.length >= 10) {
+          message.warning("Mỗi đơn chỉ được tải tối đa 10 ảnh.");
           e.target.value = "";
           return;
         }
@@ -1553,10 +1407,9 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
         let attemptedImageList: RepairImage[] | null = null;
         try {
           uploadLockRef.current = true;
-          setUploadingRowState({ rowIndex: rowIdx, stage });
+          setUploadingRowState({ rowIndex: rowIdx });
           const formData = new FormData();
           formData.append("image", file);
-          formData.append("stage", stage);
 
           const res = await uploadRepairImage({ formData }).unwrap();
           uploadedKey = res.data?.objectKey || res.data?.url;
@@ -1565,27 +1418,27 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           const latestItems = itemsRef.current;
           const latestIndex = latestItems.findIndex((item) => item._id === targetItem._id);
           if (latestIndex === -1) throw new Error("Phiếu sửa không còn tồn tại.");
-          const currentList = latestItems[latestIndex][field] || [];
+          const currentList = (latestItems[latestIndex].images || []) as RepairImage[];
           previousImageList = currentList;
           const updatedImageList = [...currentList, uploadedKey];
           attemptedImageList = updatedImageList;
           const updatedItems = [...latestItems];
           updatedItems[latestIndex] = {
             ...updatedItems[latestIndex],
-            [field]: updatedImageList,
+            images: updatedImageList,
           };
           itemsRef.current = updatedItems;
           setItems(updatedItems);
-          await flushOrderUpdate(targetItem._id, { [field]: updatedImageList });
+          await flushOrderUpdate(targetItem._id, { images: updatedImageList });
           uploadedKey = undefined;
           message.success("Tải ảnh lên thành công.");
         } catch (error: unknown) {
           if (uploadedKey && previousImageList && attemptedImageList) {
             try {
               await deleteTemporaryImage(uploadedKey).unwrap();
-              clearLocalOverrideField(targetItem._id, field, attemptedImageList);
+              clearLocalOverrideField(targetItem._id, "images", attemptedImageList);
               const rolledBackItems = itemsRef.current.map((item) =>
-                item._id === targetItem._id ? { ...item, [field]: previousImageList } : item,
+                item._id === targetItem._id ? { ...item, images: previousImageList! } : item,
               );
               itemsRef.current = rolledBackItems;
               setItems(rolledBackItems);
@@ -1613,7 +1466,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     );
 
     const handleRemoveRowImage = useCallback(
-      async (orderId: string, imgToRemove: RepairImage, stage: RepairImageStage): Promise<boolean> => {
+      async (orderId: string, imgToRemove: RepairImage): Promise<boolean> => {
         if (!canUpdate) {
           message.error("Bạn không có quyền cập nhật phiếu sửa.");
           return false;
@@ -1631,8 +1484,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           return false;
         }
 
-        const field = stage === "before" ? "beforeImages" : "afterImages";
-        const currentList = [...(latestItems[realIndex][field] || [])];
+        const currentList = [...((latestItems[realIndex].images || []) as RepairImage[])];
         const updatedImageList = removeRepairImageReference(currentList, imgToRemove);
         if (updatedImageList.length === currentList.length) {
           message.warning("Ảnh này đã được xóa hoặc không còn trong phiếu sửa.");
@@ -1642,22 +1494,22 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
         const updatedItems = [...latestItems];
         updatedItems[realIndex] = {
           ...updatedItems[realIndex],
-          [field]: updatedImageList,
+          images: updatedImageList,
         };
         itemsRef.current = updatedItems;
         setItems(updatedItems);
         try {
-          await flushOrderUpdate(orderId, { [field]: updatedImageList });
+          await flushOrderUpdate(orderId, { images: updatedImageList });
           message.success("Đã xóa ảnh thành công.");
           return true;
         } catch (error) {
           console.error("Remove image error:", error);
-          clearLocalOverrideField(orderId, field, updatedImageList);
+          clearLocalOverrideField(orderId, "images", updatedImageList);
           const rolledBackItems = itemsRef.current.map((currentItem) => {
             if (currentItem._id !== orderId) return currentItem;
-            const displayedList = currentItem[field] || [];
-            if (!areOrderFieldValuesEqual(field, displayedList, updatedImageList)) return currentItem;
-            return { ...currentItem, [field]: currentList };
+            const displayedList = currentItem.images || [];
+            if (!areOrderFieldValuesEqual("images", displayedList, updatedImageList)) return currentItem;
+            return { ...currentItem, images: currentList };
           });
           itemsRef.current = rolledBackItems;
           setItems(rolledBackItems);
@@ -1936,7 +1788,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
         modalImageFilesRef.current = uploadedImages;
         const failedUpload = uploadResults.find((result) => result.status === "rejected");
         if (failedUpload?.status === "rejected") throw failedUpload.reason;
-        const beforeImages = uploadedImages
+        const images = uploadedImages
           .map((image) => image.objectKey)
           .filter((objectKey): objectKey is string => Boolean(objectKey));
 
@@ -1950,8 +1802,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
           status: modalStatus,
           note: modalNote.trim(),
           tasks: modalTasks,
-          beforeImages,
-          afterImages: [],
+          images,
         }).unwrap();
 
         modalImageFilesRef.current.forEach((image) => URL.revokeObjectURL(image.previewUrl));
@@ -2145,10 +1996,7 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
     }, [canExport, customer, downloadCustomerRepairPdf, selectedMonth, selectedYear, isExportingPDF]);
 
     const grandTotal = useMemo(
-      () =>
-        activeItems
-          .filter((item) => item.status !== ORDER_STATUS.CANCELLED)
-          .reduce((acc, item) => acc + (Number(item.totalAmount) || Number(item.materialCost) || 0), 0),
+      () => activeItems.reduce((acc, item) => acc + (Number(item.totalAmount) || Number(item.materialCost) || 0), 0),
       [activeItems],
     );
 
@@ -2306,11 +2154,8 @@ export const CustomerRepairExcelTable: React.FC<CustomerRepairExcelTableProps> =
                       >
                         STT ▾
                       </th>
-                      <th className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
-                        <div className="font-black text-xs leading-none">TÊN SẢN PHẨM & ẢNH</div>
-                        <div className="text-[8px] font-bold text-primary dark:text-amber-400 normal-case tracking-normal leading-tight mt-1">
-                          (TRƯỚC / SAU)
-                        </div>
+                      <th className="w-48 sm:w-80 min-w-[180px] sm:min-w-[260px] whitespace-nowrap border-r border-borderLeather px-1.5 py-2.5 text-center align-middle text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
+                        SẢN PHẨM
                       </th>
                       <th className="w-auto min-w-[110px] sm:min-w-[200px] whitespace-nowrap border-r border-borderLeather px-1.5 pb-1.5 pt-2.5 text-center align-top text-xs font-black text-primary-ink dark:border-gray-700 dark:text-amber-300">
                         YÊU CẦU SỬA CHỮA

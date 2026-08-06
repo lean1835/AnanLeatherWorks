@@ -132,9 +132,7 @@ export const CustomerDetailModal: React.FC<CustomerDetailModalProps> = ({
 
   const customerGroup = orderGroupData?.data?.customers?.[0];
   const orders = customerGroup?.orders || [];
-  const totalSpent = orders
-    .filter((order) => order.status !== "Đã hủy")
-    .reduce((total, order) => total + (Number(order.totalAmount) || 0), 0);
+  const totalSpent = orders.reduce((total, order) => total + (Number(order.totalAmount) || 0), 0);
 
   return (
     <Modal

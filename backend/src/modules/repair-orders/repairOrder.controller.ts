@@ -102,6 +102,33 @@ export const deleteRepairOrder = catchAsync(async (req: AuthRequest, res: Respon
     res.status(200).json(result);
 });
 
+export const getTrashOrders = catchAsync(async (req: AuthRequest, res: Response) => {
+    const result = await repairOrderService.getTrashOrders();
+    res.status(200).json(result);
+});
+
+export const restoreAllTrashOrders = catchAsync(async (req: AuthRequest, res: Response) => {
+    const result = await repairOrderService.restoreAllTrashOrders(req.user!._id);
+    res.status(200).json(result);
+});
+
+export const emptyTrash = catchAsync(async (req: AuthRequest, res: Response) => {
+    const result = await repairOrderService.emptyTrash(req.user!._id);
+    res.status(200).json(result);
+});
+
+export const restoreRepairOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+    const id = String(req.params.id);
+    const result = await repairOrderService.restoreOrder(id, req.user!._id);
+    res.status(200).json(result);
+});
+
+export const permanentDeleteRepairOrder = catchAsync(async (req: AuthRequest, res: Response) => {
+    const id = String(req.params.id);
+    const result = await repairOrderService.permanentDeleteOrder(id, req.user!._id);
+    res.status(200).json(result);
+});
+
 export const deleteUnreferencedImage = catchAsync(async (req: AuthRequest, res: Response) => {
     const result = await repairOrderService.deleteUnreferencedImage(req.params.key);
     res.status(200).json(result);
@@ -123,7 +150,6 @@ export const uploadOrderImage = catchAsync(async (req: AuthRequest, res: Respons
             thumbnailKey: uploadRes.thumbnailKey,
             url,
             thumbnailUrl,
-            stage: req.body.stage === 'after' ? 'after' : 'before',
         },
     });
 });

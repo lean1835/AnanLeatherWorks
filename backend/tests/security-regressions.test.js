@@ -20,7 +20,8 @@ const {
 const RepairOrder = require('../src/modules/repair-orders/repairOrder.model').default;
 const User = require('../src/modules/auth/auth.model').default;
 const Customer = require('../src/modules/customers/customer.model').default;
-const { authService } = require('../src/modules/auth/auth.service');
+const authServiceModule = require('../src/modules/auth/auth.service');
+const authService = authServiceModule.authService || authServiceModule.default?.authService;
 const {
     parseVietnamBusinessDate,
     vietnamEndOfMonthUtc,
@@ -83,7 +84,7 @@ test('rejects traversal, data URLs, malformed keys, and untrusted remote URLs', 
 
 function imageFilterMatches(filter, storedReference) {
     return filter.$or.some((condition) => {
-        const matcher = condition.beforeImages || condition.afterImages;
+        const matcher = condition.images;
         return matcher.$in.some((candidate) => {
             if (typeof candidate === 'string') return candidate === storedReference;
             candidate.lastIndex = 0;
@@ -249,5 +250,29 @@ test('browser API authentication is cookie-only and rejects bearer-only sessions
         assert.equal(lookupCalls, 0);
     } finally {
         User.findById = originalFindById;
+    }
+});
+
+test('updateOrder rejects modifying a soft-deleted repair order', async () => {
+    const originalFindOne = RepairOrder.findOne;
+    let queriedFilter = null;
+    RepairOrder.findOne = async (filter) => {
+        queriedFilter = filter;
+        return null;
+    };
+    try {
+        const repairOrderServiceModule = require('../src/modules/repair-orders/repairOrder.service');
+        const repairOrderService = repairOrderServiceModule.repairOrderService;
+
+        await assert.rejects(
+            async () => {
+                await repairOrderService.updateOrder('507f1f77bcf86cd799439011', { productName: 'Ví da mới' }, 'user-id');
+            },
+            (err) => err.statusCode === 404 && err.message === 'Không tìm thấy phiếu sửa chữa',
+        );
+        assert.equal(queriedFilter._id, '507f1f77bcf86cd799439011');
+        assert.deepEqual(queriedFilter.$or, [{ deletedAt: null }, { deletedAt: { $exists: false } }]);
+    } finally {
+        RepairOrder.findOne = originalFindOne;
     }
 });

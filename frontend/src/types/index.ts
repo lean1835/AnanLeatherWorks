@@ -16,7 +16,7 @@ export interface Customer {
   note?: string;
 }
 
-export type OrderStatus = "Đang sửa" | "Hoàn thành" | "Đã hủy";
+export type OrderStatus = "Đang sửa" | "Hoàn thành" | "Đã thanh toán";
 
 export interface RepairImageReference {
   objectKey?: string;
@@ -35,13 +35,14 @@ export interface RepairOrder {
   receivedAt: string;
   dueAt: string;
   status: OrderStatus;
-  beforeImages: RepairImage[];
-  afterImages: RepairImage[];
+  images: RepairImage[];
   replacementMaterials: string[];
   tasks: string[];
   note?: string;
   totalAmount: number;
   materialCost?: number;
+  deletedAt?: string | null;
+  daysRemaining?: number;
   orderMonth?: number;
   orderYear?: number;
   isRollover?: boolean;

@@ -12,8 +12,7 @@ interface CreateRepairOrderPayload {
   status?: OrderStatus;
   replacementMaterials?: string[];
   tasks?: string[];
-  beforeImages?: string[];
-  afterImages?: string[];
+  images?: string[];
   totalAmount?: number;
 }
 
@@ -22,7 +21,6 @@ interface UploadedRepairImage {
   thumbnailKey: string;
   url: string;
   thumbnailUrl: string;
-  stage: "before" | "after";
 }
 
 export const repairOrderApi = baseApi.injectEndpoints({
@@ -110,7 +108,56 @@ export const repairOrderApi = baseApi.injectEndpoints({
         url: `/repair-orders/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: [{ type: "RepairOrders", id: "LIST" }, { type: "Dashboard" }],
+      invalidatesTags: [
+        { type: "RepairOrders", id: "LIST" },
+        { type: "RepairOrders", id: "TRASH" },
+        { type: "Dashboard" },
+      ],
+    }),
+
+    getTrashOrders: builder.query<{ success: boolean; data: RepairOrder[] }, void>({
+      query: () => "/repair-orders/trash",
+      providesTags: [{ type: "RepairOrders", id: "TRASH" }],
+    }),
+
+    restoreRepairOrder: builder.mutation<{ success: boolean; message: string }, string>({
+      query: (id) => ({
+        url: `/repair-orders/${id}/restore`,
+        method: "PATCH",
+      }),
+      invalidatesTags: [
+        { type: "RepairOrders", id: "LIST" },
+        { type: "RepairOrders", id: "TRASH" },
+        { type: "Dashboard" },
+      ],
+    }),
+
+    permanentDeleteRepairOrder: builder.mutation<{ success: boolean; message: string }, string>({
+      query: (id) => ({
+        url: `/repair-orders/${id}/permanent`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "RepairOrders", id: "TRASH" }],
+    }),
+
+    restoreAllTrashOrders: builder.mutation<{ success: boolean; message: string }, void>({
+      query: () => ({
+        url: "/repair-orders/trash/restore-all",
+        method: "PATCH",
+      }),
+      invalidatesTags: [
+        { type: "RepairOrders", id: "LIST" },
+        { type: "RepairOrders", id: "TRASH" },
+        { type: "Dashboard" },
+      ],
+    }),
+
+    emptyTrash: builder.mutation<{ success: boolean; message: string }, void>({
+      query: () => ({
+        url: "/repair-orders/trash/empty",
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "RepairOrders", id: "TRASH" }],
     }),
   }),
   overrideExisting: false,
@@ -124,4 +171,9 @@ export const {
   useGetOrdersByCustomerGroupQuery,
   useUpdateRepairOrderMutation,
   useDeleteRepairOrderMutation,
+  useGetTrashOrdersQuery,
+  useRestoreRepairOrderMutation,
+  usePermanentDeleteRepairOrderMutation,
+  useRestoreAllTrashOrdersMutation,
+  useEmptyTrashMutation,
 } = repairOrderApi;

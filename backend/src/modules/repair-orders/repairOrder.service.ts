@@ -6,6 +6,7 @@ import { IApiResponse } from '@common/interfaces/response.interface';
 import type {
     CustomerGroupedRepairOrder,
     IRepairOrder,
+    IRepairOrderTrashItem,
     RepairOrderData,
     RepairOrderStatus,
 } from '@common/interfaces/repairOrder.interface';
@@ -38,14 +39,12 @@ interface DashboardData {
         newOrders: number;
         repairing: number;
         completed: number;
-        cancelled: number;
     };
     totalOrders: number;
     totalCustomers: number;
     newOrders: number;
     inProgress: number;
     completed: number;
-    cancelled: number;
     chartData: Array<{ month: string; count: number; revenue: number }>;
     recentOrders: unknown[];
 }
@@ -79,8 +78,7 @@ interface CreateRepairOrderPayload {
     note?: string | null;
     replacementMaterials?: unknown[];
     tasks?: unknown[];
-    beforeImages?: unknown[];
-    afterImages?: unknown[];
+    images?: unknown[];
     totalAmount?: unknown;
 }
 
@@ -93,8 +91,7 @@ interface UpdateRepairOrderPayload {
     totalAmount?: unknown;
     replacementMaterials?: unknown[];
     tasks?: unknown[];
-    beforeImages?: unknown[];
-    afterImages?: unknown[];
+    images?: unknown[];
 }
 
 interface RepairOrderUpdateFields {
@@ -107,8 +104,7 @@ interface RepairOrderUpdateFields {
     totalAmount?: number;
     replacementMaterials?: string[];
     tasks?: string[];
-    beforeImages?: string[];
-    afterImages?: string[];
+    images?: string[];
 }
 
 interface CustomerGroupQuery {
@@ -159,14 +155,15 @@ export class RepairOrderService {
             last12Months.push({ ...period, key: `${period.month}/${period.year}` });
         }
 
-        const [totalOrders, inProgress, completed, cancelledOrders, monthlyStats, recentOrders, totalCustomers] =
+        const activeFilter = { $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] };
+
+        const [totalOrders, inProgress, completed, monthlyStats, recentOrders, totalCustomers] =
             await Promise.all([
-                RepairOrder.countDocuments(),
-                RepairOrder.countDocuments({ status: 'Đang sửa' }),
-                RepairOrder.countDocuments({ status: 'Hoàn thành' }),
-                RepairOrder.countDocuments({ status: 'Đã hủy' }),
+                RepairOrder.countDocuments(activeFilter),
+                RepairOrder.countDocuments({ ...activeFilter, status: 'Đang sửa' }),
+                RepairOrder.countDocuments({ ...activeFilter, status: { $in: ['Hoàn thành', 'Đã thanh toán'] } }),
                 RepairOrder.aggregate<DashboardAggregation>([
-                    { $match: { receivedAt: { $gte: startDate } } },
+                    { $match: { ...activeFilter, receivedAt: { $gte: startDate } } },
                     {
                         $group: {
                             _id: {
@@ -175,12 +172,14 @@ export class RepairOrderService {
                             },
                             count: { $sum: 1 },
                             totalRevenue: {
-                                $sum: { $cond: [{ $eq: ['$status', 'Hoàn thành'] }, '$totalAmount', 0] },
+                                $sum: {
+                                    $cond: [{ $in: ['$status', ['Hoàn thành', 'Đã thanh toán']] }, '$totalAmount', 0],
+                                },
                             },
                         },
                     },
                 ]),
-                RepairOrder.find()
+                RepairOrder.find(activeFilter)
                     .populate('customerId', 'fullName phone')
                     .sort({ createdAt: -1 })
                     .limit(5)
@@ -217,14 +216,12 @@ export class RepairOrderService {
                     newOrders: 0,
                     repairing: inProgress,
                     completed,
-                    cancelled: cancelledOrders,
                 },
                 totalOrders,
                 totalCustomers,
                 newOrders: 0,
                 inProgress,
                 completed,
-                cancelled: cancelledOrders,
                 chartData,
                 recentOrders,
             },
@@ -236,7 +233,9 @@ export class RepairOrderService {
         const limit = Math.min(100, Math.max(1, Number(query.limit) || 10));
         const skip = (page - 1) * limit;
 
-        const filter: FilterQuery<IRepairOrder> = {};
+        const filter: FilterQuery<IRepairOrder> = {
+            $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+        };
         if (query.status) {
             filter.status = query.status;
         }
@@ -276,13 +275,16 @@ export class RepairOrderService {
             throw new ApiError(400, 'ID phiếu sửa chữa không hợp lệ');
         }
 
-        const order = await RepairOrder.findById(id).populate<{ customerId: ICustomer }>('customerId').exec();
+        const order = await RepairOrder.findOne({
+            _id: id,
+            $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+        }).populate<{ customerId: ICustomer }>('customerId').exec();
         if (!order) {
             throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa');
         }
 
         const isOverdue =
-            order.status !== 'Hoàn thành' && order.status !== 'Đã hủy' && new Date() > new Date(order.dueAt);
+            order.status !== 'Hoàn thành' && order.status !== 'Đã thanh toán' && new Date() > new Date(order.dueAt);
 
         const orderData = order.toObject<RepairOrderData>();
         return {
@@ -325,8 +327,7 @@ export class RepairOrderService {
             throw new ApiError(400, 'Tổng tiền không hợp lệ.');
         }
 
-        const beforeImages = normalizeImageReferences(payload.beforeImages);
-        const afterImages = normalizeImageReferences(payload.afterImages);
+        const images = normalizeImageReferences(payload.images);
 
         const initialStatus = payload.status || 'Đang sửa';
         const isInitialCompleted = initialStatus === 'Hoàn thành';
@@ -370,8 +371,7 @@ export class RepairOrderService {
                                       )
                                     : [],
                                 tasks,
-                                beforeImages,
-                                afterImages,
+                                images,
                                 totalAmount: computedTotal,
                             },
                         ],
@@ -408,7 +408,10 @@ export class RepairOrderService {
             throw new ApiError(400, 'ID phiếu sửa chữa không hợp lệ');
         }
 
-        const existingOrder = await RepairOrder.findById(id);
+        const existingOrder = await RepairOrder.findOne({
+            _id: id,
+            $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
+        });
         if (!existingOrder) throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa');
 
         const {
@@ -419,8 +422,7 @@ export class RepairOrderService {
             status,
             totalAmount,
             replacementMaterials,
-            beforeImages,
-            afterImages,
+            images,
         } = payload;
         const updateFields: RepairOrderUpdateFields = {};
 
@@ -468,11 +470,8 @@ export class RepairOrderService {
             );
         }
 
-        if (Array.isArray(beforeImages)) {
-            updateFields.beforeImages = normalizeImageReferences(beforeImages);
-        }
-        if (Array.isArray(afterImages)) {
-            updateFields.afterImages = normalizeImageReferences(afterImages);
+        if (Array.isArray(images)) {
+            updateFields.images = normalizeImageReferences(images);
         }
 
         const order = await RepairOrder.findByIdAndUpdate(
@@ -484,11 +483,12 @@ export class RepairOrderService {
             throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa');
         }
 
-        const previousKeys = [...(existingOrder.beforeImages || []), ...(existingOrder.afterImages || [])]
+        const previousKeys = (existingOrder.images || [])
             .map((image) => normalizeImageObjectKey(image))
             .filter((key): key is string => Boolean(key));
+
         const currentKeys = new Set(
-            [...(order.beforeImages || []), ...(order.afterImages || [])]
+            (order.images || [])
                 .map((image) => normalizeImageObjectKey(image))
                 .filter((key): key is string => Boolean(key)),
         );
@@ -529,7 +529,9 @@ export class RepairOrderService {
             throw new ApiError(404, 'Không tìm thấy dữ liệu sửa chữa cho khách hàng này');
         }
 
-        const validOrders = (custGroup.orders || []).filter((order) => order.status !== 'Đã hủy');
+        const validOrders = (custGroup.orders || []).filter(
+            (order) => order.status !== 'Đã thanh toán' && (order.status as string) !== 'Đã hủy',
+        );
         if (validOrders.length > 250) {
             throw new ApiError(400, 'Bản PDF vượt quá 250 phiếu. Hãy chọn phạm vi tháng nhỏ hơn.');
         }
@@ -567,6 +569,7 @@ export class RepairOrderService {
         const targetCustomerIds = matchedCustomers.map((c) => c._id);
 
         const orderFilter: FilterQuery<IRepairOrder> = {
+            $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }],
             receivedAt: { $lte: currentMonthEnd },
             customerId: { $in: targetCustomerIds },
         };
@@ -607,8 +610,13 @@ export class RepairOrderService {
 
             const isPastOrder = orderYear < year || (orderYear === year && orderMonth < month);
 
-            const isCompleted = order.status === 'Hoàn thành';
-            const isCancelled = order.status === 'Đã hủy';
+            const isPaid = order.status === 'Đã thanh toán';
+            const isCompleted = order.status === 'Hoàn thành' || isPaid;
+
+            // If an order from a past month is 'Đã thanh toán', do NOT roll it over to subsequent months
+            if (isPastOrder && isPaid) {
+                continue;
+            }
 
             const completedDate = isCompleted
                 ? order.completedAt
@@ -620,22 +628,17 @@ export class RepairOrderService {
             const completedYear = completedPeriod?.year ?? null;
             const completedMonth = completedPeriod?.month ?? null;
 
-            // Check if order was ALREADY completed in a month BEFORE the target view month
+            // Check if order was ALREADY completed/paid in a month BEFORE the target view month
             const isFinishedBeforeTargetMonth =
                 isCompleted &&
                 completedDate &&
                 (completedYear! < year || (completedYear! === year && completedMonth! < month));
 
-            // Check if order was completed IN the target view month
+            // Check if order was completed/paid IN the target view month
             const isFinishedInTargetMonth =
                 isCompleted && completedDate && completedYear === year && completedMonth === month;
 
-            // 1. Past cancelled orders do not roll over
-            if (isPastOrder && isCancelled) {
-                continue;
-            }
-
-            // 2. If order was ALREADY finished in a previous month before target month, do not roll it over to target month
+            // If order was ALREADY finished in a previous month before target month, do not roll it over to target month
             if (isPastOrder && isFinishedBeforeTargetMonth) {
                 continue;
             }
@@ -660,11 +663,11 @@ export class RepairOrderService {
 
             const group = customerMap.get(custId);
             if (!group) continue;
+            const images = Array.isArray(order.images) ? order.images : [];
             const orderObj: CustomerGroupedRepairOrder = {
                 ...order.toObject<RepairOrderData>(),
                 tasks,
-                beforeImages: Array.isArray(order.beforeImages) ? order.beforeImages : [],
-                afterImages: Array.isArray(order.afterImages) ? order.afterImages : [],
+                images,
                 totalAmount: order.totalAmount || 0,
                 isRollover,
                 monthsAgo,
@@ -673,7 +676,7 @@ export class RepairOrderService {
                 pushedToYear: isPushedForward ? targetPushedYear : null,
             };
             group.orders.push(orderObj);
-            if (!isCancelled) group.totalAmount += orderObj.totalAmount;
+            group.totalAmount += orderObj.totalAmount;
         }
 
         if (query.customerId && customerMap.size === 0 && mongoose.Types.ObjectId.isValid(query.customerId)) {
@@ -705,20 +708,137 @@ export class RepairOrderService {
             throw new ApiError(400, 'ID phiếu sửa chữa không hợp lệ');
         }
 
-        const order = await RepairOrder.findByIdAndDelete(id);
+        const order = await RepairOrder.findOneAndUpdate(
+            { _id: id, $or: [{ deletedAt: null }, { deletedAt: { $exists: false } }] },
+            { $set: { deletedAt: new Date() } },
+            { new: true },
+        );
         if (!order) {
-            throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa để xóa');
+            throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa để chuyển vào thùng rác');
         }
 
-        const imageKeys = [...(order.beforeImages || []), ...(order.afterImages || [])]
-            .map((image) => normalizeImageObjectKey(image))
-            .filter((key): key is string => Boolean(key));
-        await cleanupUnreferencedImages(imageKeys);
-        logger.info(`Audit repair-order.delete actor=${String(actorId)} order=${id} fields=[record]`);
+        logger.info(`Audit repair-order.soft-delete actor=${String(actorId)} order=${id}`);
 
         return {
             success: true,
-            message: 'Xóa phiếu sửa chữa thành công',
+            message: 'Đã chuyển phiếu sửa chữa vào thùng rác',
+        };
+    }
+
+    public async getTrashOrders(): Promise<IApiResponse<IRepairOrderTrashItem[]>> {
+        const deletedOrders = await RepairOrder.find({ deletedAt: { $ne: null } })
+            .populate('customerId', 'fullName phone')
+            .sort({ deletedAt: -1 })
+            .lean()
+            .exec();
+
+        const now = Date.now();
+        const items: IRepairOrderTrashItem[] = deletedOrders.map((order) => {
+            const deletedTime = order.deletedAt ? new Date(order.deletedAt).getTime() : now;
+            const daysPast = Math.floor((now - deletedTime) / (1000 * 60 * 60 * 24));
+            const daysRemaining = Math.max(0, 30 - daysPast);
+            return {
+                ...order,
+                deletedAt: order.deletedAt || new Date(deletedTime),
+                daysRemaining,
+            } as IRepairOrderTrashItem;
+        });
+
+        return {
+            success: true,
+            message: 'Lấy danh sách phiếu đã xóa thành công',
+            data: items,
+        };
+    }
+
+    public async restoreOrder(id: string, actorId: Types.ObjectId | string): Promise<IApiResponse<void>> {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new ApiError(400, 'ID phiếu sửa chữa không hợp lệ');
+        }
+
+        const order = await RepairOrder.findOneAndUpdate(
+            { _id: id, deletedAt: { $ne: null } },
+            { $set: { deletedAt: null } },
+            { new: true },
+        );
+
+        if (!order) {
+            throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa trong thùng rác để khôi phục');
+        }
+
+        logger.info(`Audit repair-order.restore actor=${String(actorId)} order=${id}`);
+
+        return {
+            success: true,
+            message: 'Khôi phục phiếu sửa chữa thành công',
+        };
+    }
+
+    public async permanentDeleteOrder(id: string, actorId: Types.ObjectId | string): Promise<IApiResponse<void>> {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new ApiError(400, 'ID phiếu sửa chữa không hợp lệ');
+        }
+
+        const order = await RepairOrder.findOneAndDelete({ _id: id, deletedAt: { $ne: null } });
+        if (!order) {
+            throw new ApiError(404, 'Không tìm thấy phiếu sửa chữa trong thùng rác để xóa vĩnh viễn');
+        }
+
+        const imageKeys = (order.images || [])
+            .map((image) => normalizeImageObjectKey(image))
+            .filter((key): key is string => Boolean(key));
+        await cleanupUnreferencedImages(imageKeys);
+        logger.info(`Audit repair-order.permanent-delete actor=${String(actorId)} order=${id}`);
+
+        return {
+            success: true,
+            message: 'Đã xóa vĩnh viễn phiếu sửa chữa khỏi hệ thống',
+        };
+    }
+
+    public async restoreAllTrashOrders(actorId: Types.ObjectId | string): Promise<IApiResponse<void>> {
+        const result = await RepairOrder.updateMany(
+            { deletedAt: { $ne: null } },
+            { $set: { deletedAt: null } },
+        );
+
+        logger.info(`Audit repair-order.restore-all actor=${String(actorId)} count=${result.modifiedCount}`);
+
+        return {
+            success: true,
+            message: `Đã khôi phục ${result.modifiedCount} phiếu sửa chữa từ thùng rác`,
+        };
+    }
+
+    public async emptyTrash(actorId: Types.ObjectId | string): Promise<IApiResponse<void>> {
+        const deletedOrders = await RepairOrder.find({ deletedAt: { $ne: null } })
+            .select('images')
+            .lean()
+            .exec();
+
+        if (deletedOrders.length === 0) {
+            return {
+                success: true,
+                message: 'Thùng rác đã trống',
+            };
+        }
+
+        const imageKeys = new Set<string>();
+        for (const order of deletedOrders) {
+            for (const image of order.images || []) {
+                const key = normalizeImageObjectKey(image);
+                if (key) imageKeys.add(key);
+            }
+        }
+
+        await RepairOrder.deleteMany({ deletedAt: { $ne: null } });
+        await cleanupUnreferencedImages(imageKeys);
+
+        logger.info(`Audit repair-order.empty-trash actor=${String(actorId)} count=${deletedOrders.length}`);
+
+        return {
+            success: true,
+            message: `Đã xóa vĩnh viễn tất cả ${deletedOrders.length} phiếu sửa chữa trong thùng rác`,
         };
     }
 
@@ -740,6 +860,33 @@ export class RepairOrderService {
             message: 'Đã dọn ảnh tải lên chưa được sử dụng.',
             data: { objectKey },
         };
+    }
+
+    public async purgeExpiredTrashOrders(): Promise<number> {
+        const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const expiredOrders = await RepairOrder.find({
+            deletedAt: { $ne: null, $lte: thirtyDaysAgo },
+        })
+            .select('images')
+            .lean()
+            .exec();
+
+        if (expiredOrders.length === 0) return 0;
+
+        const imageKeys = new Set<string>();
+        for (const order of expiredOrders) {
+            for (const image of order.images || []) {
+                const key = normalizeImageObjectKey(image);
+                if (key) imageKeys.add(key);
+            }
+        }
+
+        const expiredIds = expiredOrders.map((order) => order._id);
+        await RepairOrder.deleteMany({ _id: { $in: expiredIds } });
+        await cleanupUnreferencedImages(imageKeys);
+
+        logger.info(`Auto-purged ${expiredOrders.length} trash order(s) older than 30 days.`);
+        return expiredOrders.length;
     }
 }
 

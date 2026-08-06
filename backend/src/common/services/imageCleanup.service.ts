@@ -7,8 +7,7 @@ const CLEANUP_CONCURRENCY = 4;
 
 type ReferenceFilter = {
     $or: Array<{
-        beforeImages?: { $in: Array<string | RegExp> };
-        afterImages?: { $in: Array<string | RegExp> };
+        images?: { $in: Array<string | RegExp> };
     }>;
 };
 
@@ -65,7 +64,9 @@ export function buildImageReferenceFilter(objectKey: string): ReferenceFilter {
     addTrustedUrlPatterns(candidates, normalizedKey);
 
     return {
-        $or: [{ beforeImages: { $in: candidates } }, { afterImages: { $in: candidates } }],
+        $or: [
+            { images: { $in: candidates } },
+        ],
     };
 }
 

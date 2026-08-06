@@ -14,7 +14,7 @@ const imageReferenceSchema = Joi.alternatives()
     })
     .messages({ 'image.invalid': 'Ảnh phải dùng object key hợp lệ của hệ thống' });
 
-const statusSchema = Joi.string().valid('Đang sửa', 'Hoàn thành', 'Đã hủy');
+const statusSchema = Joi.string().valid('Đang sửa', 'Hoàn thành', 'Đã thanh toán');
 const textListSchema = Joi.array().max(50).items(Joi.string().trim().max(500).allow(''));
 const imageListSchema = Joi.array().max(10).items(imageReferenceSchema);
 
@@ -42,8 +42,7 @@ export const createRepairOrderSchema = Joi.object({
     orderMonth: Joi.number().min(1).max(12).optional(),
     orderYear: Joi.number().min(2020).optional(),
     tasks: textListSchema.optional(),
-    beforeImages: imageListSchema.optional(),
-    afterImages: imageListSchema.optional(),
+    images: imageListSchema.optional(),
     totalAmount: Joi.number().integer().min(0).max(MAX_MONEY).optional(),
 });
 
@@ -56,8 +55,7 @@ export const updateRepairOrderSchema = Joi.object({
     status: statusSchema.optional(),
     replacementMaterials: textListSchema.optional(),
     tasks: textListSchema.optional(),
-    beforeImages: imageListSchema.optional(),
-    afterImages: imageListSchema.optional(),
+    images: imageListSchema.optional(),
 }).min(1);
 
 export const repairOrderListQuerySchema = Joi.object({

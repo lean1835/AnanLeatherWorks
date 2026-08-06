@@ -254,9 +254,7 @@ export async function generateRepairOrderPDF(
 
                 doc.font(fontBold).fontSize(8.5).fillColor('#30231E');
                 doc.text('STT', 36, headerY + 14, { width: 22, align: 'center' });
-                doc.text('TÊN SẢN PHẨM & ẢNH', 58, headerY + 14, { width: 136, align: 'center' });
-                doc.font(fontRegular).fontSize(7.5).fillColor('#746A64');
-                doc.text('(TRƯỚC / SAU)', 58, headerY + 27, { width: 136, align: 'center' });
+                doc.text('SẢN PHẨM', 58, headerY + 14, { width: 136, align: 'center' });
                 doc.font(fontBold).fontSize(8.5).fillColor('#30231E');
                 doc.text('YÊU CẦU SỬA CHỮA', 194, headerY + 14, { width: 114, align: 'center' });
                 doc.text('PHỤ KIỆN THAY THẾ', 308, headerY + 14, { width: 100, align: 'center' });
@@ -264,25 +262,13 @@ export async function generateRepairOrderPDF(
                 doc.text('GHI CHÚ', 484, headerY + 14, { width: 75.28 });
 
                 currentY += headerHeight;
-                const beforeImages = (
+                const rawImgs = Array.isArray(order.images) ? order.images : [];
+                const orderImages = (
                     await Promise.all(
-                        (Array.isArray(order.beforeImages) ? order.beforeImages.slice(0, 1) : []).map(
-                            async (url: string) => ({
-                                url,
-                                buffer: await storageService.getImageBuffer(url),
-                            }),
-                        ),
-                    )
-                ).filter(hasImageBuffer);
-
-                const afterImages = (
-                    await Promise.all(
-                        (Array.isArray(order.afterImages) ? order.afterImages.slice(0, 1) : []).map(
-                            async (url: string) => ({
-                                url,
-                                buffer: await storageService.getImageBuffer(url),
-                            }),
-                        ),
+                        rawImgs.slice(0, 1).map(async (url: string) => ({
+                            url,
+                            buffer: await storageService.getImageBuffer(url),
+                        })),
                     )
                 ).filter(hasImageBuffer);
 
@@ -294,10 +280,18 @@ export async function generateRepairOrderPDF(
 
                 const itemTotal = Number(order.totalAmount) || 0;
 
+                const productNameStr = String(order.productName || '').trim();
+                doc.font(fontBold).fontSize(9.5);
+                const productNameHeight = productNameStr
+                    ? doc.heightOfString(productNameStr, { width: 132, align: 'center' })
+                    : 0;
+
                 const taskLineCount = taskLines ? taskLines.split('\n').length : 1;
                 const taskHeight = taskLineCount * 15;
-                const col2Height = (order.productName ? 18 : 0) + 52 + 20;
-                const rowHeight = Math.max(82, col2Height, 20 + taskHeight);
+                const photoSize = 68;
+                const photoX = 92;
+                const col2Height = 10 + (productNameHeight > 0 ? productNameHeight + 6 : 0) + photoSize + 10;
+                const rowHeight = Math.max(90, col2Height, 20 + taskHeight);
 
                 const statusStr = (order.status || '').toString().trim().toLowerCase();
                 let rowBgColor = '#FFFFFF';
@@ -333,56 +327,35 @@ export async function generateRepairOrderPDF(
 
                 // Col 2: TÊN SẢN PHẨM (trên) + ẢNH (dưới)
                 let col2ContentY = currentY + 10;
-                if (order.productName) {
+                if (productNameStr) {
                     doc.font(fontBold).fontSize(9.5).fillColor('#30231E');
-                    doc.text(order.productName, 58, col2ContentY, { width: 136, align: 'center' });
-                    col2ContentY += 16;
+                    doc.text(productNameStr, 60, col2ContentY, { width: 132, align: 'center' });
+                    col2ContentY += productNameHeight + 6;
                 }
 
                 const photoY = col2ContentY;
-                const leftPhotoX = 70;
-                const rightPhotoX = 126;
 
-                if (beforeImages.length > 0) {
+                if (orderImages.length > 0 && orderImages[0].buffer) {
                     try {
                         doc.save();
-                        doc.roundedRect(leftPhotoX, photoY, 52, 52, 4).clip();
-                        doc.image(beforeImages[0].buffer!, leftPhotoX, photoY, {
-                            fit: [52, 52],
+                        doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).clip();
+                        doc.image(orderImages[0].buffer, photoX, photoY, {
+                            cover: [photoSize, photoSize],
                             align: 'center',
                             valign: 'center',
                         });
                         doc.restore();
-                        doc.roundedRect(leftPhotoX, photoY, 52, 52, 4).stroke('#E5DDD6');
+                        doc.strokeColor('#F59E0B').lineWidth(1.2);
+                        doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).stroke();
                     } catch (e) {
-                        logger.error('Error embedding before image in PDF:', e);
+                        logger.error('Error embedding image in PDF:', e);
                     }
                 } else {
-                    doc.roundedRect(leftPhotoX, photoY, 52, 52, 4).fill('#F7F4F1').stroke('#E5DDD6');
-                    doc.font(fontRegular).fontSize(7.5).fillColor('#746A64');
-                    doc.text('Chưa có\nảnh', leftPhotoX, photoY + 16, { width: 52, align: 'center' });
-                }
-
-                const isDelivered = (order.status || '').toLowerCase().includes('hoàn thành');
-                const sauBorderColor = isDelivered ? '#0068FF' : '#E5DDD6';
-                if (afterImages.length > 0) {
-                    try {
-                        doc.save();
-                        doc.roundedRect(rightPhotoX, photoY, 52, 52, 4).clip();
-                        doc.image(afterImages[0].buffer!, rightPhotoX, photoY, {
-                            fit: [52, 52],
-                            align: 'center',
-                            valign: 'center',
-                        });
-                        doc.restore();
-                        doc.roundedRect(rightPhotoX, photoY, 52, 52, 4).stroke(sauBorderColor);
-                    } catch (e) {
-                        logger.error('Error embedding after image in PDF:', e);
-                    }
-                } else {
-                    doc.roundedRect(rightPhotoX, photoY, 52, 52, 4).fill('#F7F4F1').stroke('#E5DDD6');
-                    doc.font(fontRegular).fontSize(7.5).fillColor('#746A64');
-                    doc.text('Chưa có\nảnh', rightPhotoX, photoY + 16, { width: 52, align: 'center' });
+                    doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).fill('#F7F4F1');
+                    doc.strokeColor('#F59E0B').lineWidth(1.2);
+                    doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).stroke();
+                    doc.font(fontRegular).fontSize(8).fillColor('#746A64');
+                    doc.text('Chưa có\nảnh', photoX, photoY + Math.floor((photoSize - 20) / 2), { width: photoSize, align: 'center' });
                 }
 
                 // Col 3: YÊU CẦU SỬA CHỮA (8pt left padding from X=194)
@@ -537,15 +510,13 @@ export async function generateCustomerGroupPDF(
     _month?: number,
     _year?: number,
 ): Promise<Buffer> {
-    const ordersWithImages = await mapWithConcurrency(ordersWithDetails, 4, async (item) => {
-        const beforeImages = await Promise.all(
-            (Array.isArray(item.beforeImages) ? item.beforeImages.slice(0, 1) : []).map(async (img) => {
-                const buffer = await fetchImageBuffer(img);
-                return { url: img, buffer };
-            }),
-        );
-        const afterImages = await Promise.all(
-            (Array.isArray(item.afterImages) ? item.afterImages.slice(0, 1) : []).map(async (img) => {
+    const activeOrders = ordersWithDetails.filter(
+        (item) => item.status !== 'Đã thanh toán' && (item.status as string) !== 'Đã hủy',
+    );
+    const ordersWithImages = await mapWithConcurrency(activeOrders, 4, async (item) => {
+        const rawImgs = Array.isArray(item.images) ? item.images : [];
+        const imagesLoaded = await Promise.all(
+            rawImgs.slice(0, 1).map(async (img) => {
                 const buffer = await fetchImageBuffer(img);
                 return { url: img, buffer };
             }),
@@ -553,8 +524,7 @@ export async function generateCustomerGroupPDF(
 
         return {
             ...item,
-            beforeImagesLoaded: beforeImages.filter(hasImageBuffer),
-            afterImagesLoaded: afterImages.filter(hasImageBuffer),
+            imagesLoaded: imagesLoaded.filter(hasImageBuffer),
         };
     });
 
@@ -730,9 +700,7 @@ export async function generateCustomerGroupPDF(
 
             doc.font(fontBold).fontSize(8.5).fillColor('#30231E');
             doc.text('STT', 36, headerY + 14, { width: 22, align: 'center' });
-            doc.text('TÊN SẢN PHẨM & ẢNH', 58, headerY + 14, { width: 136, align: 'center' });
-            doc.font(fontRegular).fontSize(7.5).fillColor('#746A64');
-            doc.text('(TRƯỚC / SAU)', 58, headerY + 27, { width: 136, align: 'center' });
+            doc.text('SẢN PHẨM', 58, headerY + 14, { width: 136, align: 'center' });
             doc.font(fontBold).fontSize(8.5).fillColor('#30231E');
             doc.text('YÊU CẦU SỬA CHỮA', 194, headerY + 14, { width: 114, align: 'center' });
             doc.text('PHỤ KIỆN THAY THẾ', 308, headerY + 14, { width: 100, align: 'center' });
@@ -745,18 +713,25 @@ export async function generateCustomerGroupPDF(
                 const tasks = order.tasks || [];
                 const itemTotal = Number(order.totalAmount) || 0;
 
-                const beforeImages = order.beforeImagesLoaded || [];
-                const afterImages = order.afterImagesLoaded || [];
+                const imagesLoaded = (order as unknown as Record<string, unknown>).imagesLoaded as Array<{ url: string; buffer: Buffer }> || [];
                 const uniqueTaskNames: string[] =
                     Array.isArray(tasks) && tasks.length > 0
                         ? Array.from(new Set(tasks.map((task) => String(task || '').trim()).filter(Boolean)))
                         : [];
                 const taskLines = uniqueTaskNames.map((name) => `• ${name}`).join('\n');
 
+                const productNameStr = String(order.productName || '').trim();
+                doc.font(fontBold).fontSize(9.5);
+                const productNameHeight = productNameStr
+                    ? doc.heightOfString(productNameStr, { width: 132, align: 'center' })
+                    : 0;
+
                 const taskLineCount = taskLines ? taskLines.split('\n').length : 1;
                 const taskHeight = taskLineCount * 15;
-                const col2Height = (order.productName ? 18 : 0) + 52 + 20;
-                const rowHeight = Math.max(82, col2Height, 20 + taskHeight);
+                const photoSize = 68;
+                const photoX = 92;
+                const col2Height = 10 + (productNameHeight > 0 ? productNameHeight + 6 : 0) + photoSize + 10;
+                const rowHeight = Math.max(90, col2Height, 20 + taskHeight);
 
                 if (currentY + rowHeight > 760) {
                     doc.addPage();
@@ -793,56 +768,35 @@ export async function generateCustomerGroupPDF(
 
                 // Col 2: TÊN SẢN PHẨM (trên) + ẢNH (dưới)
                 let col2ContentY = currentY + 10;
-                if (order.productName) {
+                if (productNameStr) {
                     doc.font(fontBold).fontSize(9.5).fillColor('#30231E');
-                    doc.text(order.productName, 58, col2ContentY, { width: 136, align: 'center' });
-                    col2ContentY += 16;
+                    doc.text(productNameStr, 60, col2ContentY, { width: 132, align: 'center' });
+                    col2ContentY += productNameHeight + 6;
                 }
 
                 const photoY = col2ContentY;
-                const leftPhotoX = 70;
-                const rightPhotoX = 126;
 
-                if (beforeImages.length > 0) {
+                if (imagesLoaded.length > 0 && imagesLoaded[0].buffer) {
                     try {
                         doc.save();
-                        doc.roundedRect(leftPhotoX, photoY, 52, 52, 4).clip();
-                        doc.image(beforeImages[0].buffer, leftPhotoX, photoY, {
-                            fit: [52, 52],
+                        doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).clip();
+                        doc.image(imagesLoaded[0].buffer, photoX, photoY, {
+                            cover: [photoSize, photoSize],
                             align: 'center',
                             valign: 'center',
                         });
                         doc.restore();
-                        doc.roundedRect(leftPhotoX, photoY, 52, 52, 4).stroke('#E5DDD6');
+                        doc.strokeColor('#F59E0B').lineWidth(1.2);
+                        doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).stroke();
                     } catch (e) {
-                        logger.error('Error embedding group before image in PDF:', e);
+                        logger.error('Error embedding group image in PDF:', e);
                     }
                 } else {
-                    doc.roundedRect(leftPhotoX, photoY, 52, 52, 4).fill('#F7F4F1').stroke('#E5DDD6');
-                    doc.font(fontRegular).fontSize(7.5).fillColor('#746A64');
-                    doc.text('Chưa có\nảnh', leftPhotoX, photoY + 16, { width: 52, align: 'center' });
-                }
-
-                const isDelivered = (order.status || '').toLowerCase().includes('hoàn thành');
-                const sauBorderColor = isDelivered ? '#0068FF' : '#E5DDD6';
-                if (afterImages.length > 0) {
-                    try {
-                        doc.save();
-                        doc.roundedRect(rightPhotoX, photoY, 52, 52, 4).clip();
-                        doc.image(afterImages[0].buffer, rightPhotoX, photoY, {
-                            fit: [52, 52],
-                            align: 'center',
-                            valign: 'center',
-                        });
-                        doc.restore();
-                        doc.roundedRect(rightPhotoX, photoY, 52, 52, 4).stroke(sauBorderColor);
-                    } catch (e) {
-                        logger.error('Error embedding group after image in PDF:', e);
-                    }
-                } else {
-                    doc.roundedRect(rightPhotoX, photoY, 52, 52, 4).fill('#F7F4F1').stroke('#E5DDD6');
-                    doc.font(fontRegular).fontSize(7.5).fillColor('#746A64');
-                    doc.text('Chưa có\nảnh', rightPhotoX, photoY + 16, { width: 52, align: 'center' });
+                    doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).fill('#F7F4F1');
+                    doc.strokeColor('#F59E0B').lineWidth(1.2);
+                    doc.roundedRect(photoX, photoY, photoSize, photoSize, 6).stroke();
+                    doc.font(fontRegular).fontSize(8).fillColor('#746A64');
+                    doc.text('Chưa có\nảnh', photoX, photoY + Math.floor((photoSize - 20) / 2), { width: photoSize, align: 'center' });
                 }
 
                 // Col 3: YÊU CẦU SỬA CHỮA (8pt left padding from X=194)
@@ -922,11 +876,6 @@ export async function generateCustomerGroupPDF(
                 .moveTo(startX, currentY + totalRowHeight)
                 .lineTo(endX, currentY + totalRowHeight)
                 .stroke();
-
-            doc.strokeColor('#E0D8D0').lineWidth(0.8);
-            doc.moveTo(408, currentY).lineTo(408, currentY + totalRowHeight).stroke();
-            doc.moveTo(476, currentY).lineTo(476, currentY + totalRowHeight).stroke();
-
             const summaryY = currentY + 9;
             doc.font(fontBold).fontSize(9.5).fillColor('#1C1410');
             doc.text('TỔNG CỘNG:', startX, summaryY, { width: 364, align: 'right' });

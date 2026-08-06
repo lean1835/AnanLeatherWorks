@@ -8,7 +8,7 @@ interface StatusTagProps {
 }
 
 const StatusTag: React.FC<StatusTagProps> = ({ status, isOverdue }) => {
-  if (isOverdue) {
+  if (isOverdue && status !== ORDER_STATUS.COMPLETED && status !== ORDER_STATUS.PAID) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-100 px-2.5 py-0.5 text-[10px] font-bold uppercase text-red-700 shadow-sm">
         <span className="h-1.5 w-1.5 animate-ping rounded-full bg-red-700" /> Trễ hẹn
@@ -25,8 +25,8 @@ const StatusTag: React.FC<StatusTagProps> = ({ status, isOverdue }) => {
     case ORDER_STATUS.COMPLETED:
       styleClass = "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950/60 dark:text-blue-200 dark:border-blue-700 font-extrabold";
       break;
-    case ORDER_STATUS.CANCELLED:
-      styleClass = "bg-rose-100 text-rose-800 border-rose-200";
+    case ORDER_STATUS.PAID:
+      styleClass = "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950/60 dark:text-rose-200 dark:border-rose-700 font-extrabold";
       break;
   }
 

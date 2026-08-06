@@ -127,11 +127,11 @@ export class CustomerService {
                 }
 
                 const orders = await RepairOrder.find({ customerId: id })
-                    .select('beforeImages afterImages')
+                    .select('images')
                     .session(session)
                     .lean();
                 for (const order of orders) {
-                    for (const image of [...(order.beforeImages || []), ...(order.afterImages || [])]) {
+                    for (const image of order.images || []) {
                         const key = normalizeImageObjectKey(image);
                         if (key) imageKeys.add(key);
                     }

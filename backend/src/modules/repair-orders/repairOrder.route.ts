@@ -10,6 +10,11 @@ import {
     exportCustomerPDF,
     getByCustomerGroup,
     deleteRepairOrder,
+    getTrashOrders,
+    restoreAllTrashOrders,
+    emptyTrash,
+    restoreRepairOrder,
+    permanentDeleteRepairOrder,
     uploadOrderImage,
     streamImage,
     deleteUnreferencedImage,
@@ -76,6 +81,21 @@ router.get(
     requireCapability(CAPABILITIES.REPAIR_ORDERS_VIEW),
     validate(repairOrderListQuerySchema, 'query'),
     getRepairOrders,
+);
+router.get('/trash', requireCapability(CAPABILITIES.REPAIR_ORDERS_VIEW), getTrashOrders);
+router.patch('/trash/restore-all', requireCapability(CAPABILITIES.REPAIR_ORDERS_UPDATE), restoreAllTrashOrders);
+router.delete('/trash/empty', requireCapability(CAPABILITIES.REPAIR_ORDERS_DELETE), emptyTrash);
+router.patch(
+    '/:id/restore',
+    requireCapability(CAPABILITIES.REPAIR_ORDERS_UPDATE),
+    validate(repairOrderIdParamsSchema, 'params'),
+    restoreRepairOrder,
+);
+router.delete(
+    '/:id/permanent',
+    requireCapability(CAPABILITIES.REPAIR_ORDERS_DELETE),
+    validate(repairOrderIdParamsSchema, 'params'),
+    permanentDeleteRepairOrder,
 );
 router.get(
     '/:id',
