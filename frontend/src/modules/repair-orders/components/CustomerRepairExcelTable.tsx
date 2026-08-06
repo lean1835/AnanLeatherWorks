@@ -273,6 +273,18 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
       });
     }, [images.length]);
 
+    useEffect(() => {
+      if (images.length > 0 && typeof window !== "undefined") {
+        images.forEach((img) => {
+          const url = resolveRepairImageUrl(img);
+          if (url) {
+            const preloader = new window.Image();
+            preloader.src = url;
+          }
+        });
+      }
+    }, [images]);
+
     const uniqueTasks = useMemo(() => {
       return Array.from(new Set((item.tasks || []).map((t: string) => (t || "").trim()).filter(Boolean))) as string[];
     }, [item.tasks]);
@@ -499,7 +511,6 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                   {images.map((img, imgIdx) => (
                     <div
                       key={getRepairImageReference(img) || imgIdx}
-                      onClick={() => setPreviewState({ visible: true, current: 0 })}
                       className={
                         imgIdx === 0
                           ? "w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border border-amber-400 dark:border-amber-700 shadow-sm relative group/img bg-black shrink-0 cursor-pointer select-none"
@@ -509,7 +520,6 @@ const RepairTableRow: React.FC<RepairTableRowProps> = React.memo(
                       <Image
                         src={resolveRepairImageUrl(img)}
                         alt="Ảnh"
-                        loading="lazy"
                         placeholder={
                           <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
                             <Spin size="small" />
