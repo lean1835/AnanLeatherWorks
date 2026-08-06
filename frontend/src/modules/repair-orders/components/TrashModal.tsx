@@ -83,20 +83,20 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onClose }) => {
       {
         title: "STT",
         key: "stt",
-        width: 50,
+        width: 32,
         align: "center",
-        render: (_, __, index) => <span className="text-xs font-bold text-gray-500">{index + 1}</span>,
+        render: (_, __, index) => <span className="text-[11px] font-bold text-gray-500">{index + 1}</span>,
       },
       {
         title: "Khách hàng",
         key: "customer",
-        width: 170,
+        width: 85,
         render: (_, record) => {
           const cust = record.customerId as Customer;
           return (
-            <div className="leading-tight">
-              <div className="font-extrabold text-xs text-gray-900 dark:text-gray-100">{cust?.fullName || "Khách lẻ"}</div>
-              <div className="text-[11px] font-mono text-gray-500 dark:text-gray-400">{cust?.phone || "—"}</div>
+            <div className="leading-tight overflow-hidden">
+              <div className="font-extrabold text-xs text-gray-900 dark:text-gray-100 truncate">{cust?.fullName || "Khách lẻ"}</div>
+              <div className="text-[10px] font-mono text-gray-400 dark:text-gray-500 truncate">{cust?.phone || "—"}</div>
             </div>
           );
         },
@@ -105,72 +105,71 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onClose }) => {
         title: "Sản phẩm",
         dataIndex: "productName",
         key: "productName",
-        width: 180,
-        render: (text) => <span className="font-bold text-xs text-gray-800 dark:text-gray-200">{text}</span>,
+        width: 60,
+        render: (text) => <span className="font-extrabold text-xs text-gray-900 dark:text-gray-100 block truncate">{text}</span>,
       },
       {
         title: "Ngày xóa",
         dataIndex: "deletedAt",
         key: "deletedAt",
-        width: 140,
+        width: 75,
+        align: "center",
         render: (date) => (
-          <span className="text-[11px] font-mono text-gray-600 dark:text-gray-400">
-            {date ? dayjs(date).format("DD/MM/YYYY HH:mm") : "—"}
-          </span>
+          <div className="text-[10px] font-mono leading-tight">
+            <div className="text-gray-600 dark:text-gray-400">{date ? dayjs(date).format("DD/MM/YYYY") : "—"}</div>
+            {date && <div className="text-gray-400 dark:text-gray-500 text-[9px]">{dayjs(date).format("HH:mm")}</div>}
+          </div>
         ),
       },
       {
         title: "Tự động xóa sau",
         dataIndex: "daysRemaining",
         key: "daysRemaining",
-        width: 130,
+        width: 70,
         align: "center",
         render: (days: number) => {
           const count = typeof days === "number" ? days : 30;
           return (
-            <Tag color={count <= 3 ? "error" : count <= 7 ? "warning" : "default"} className="font-bold text-[11px] px-2 py-0.5 rounded">
+            <span className="inline-block font-bold text-[10px] text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 rounded px-1.5 py-0.5 shadow-2xs">
               {count} ngày
-            </Tag>
+            </span>
           );
         },
       },
       {
         title: "Hành động",
         key: "action",
-        width: 110,
+        width: 65,
         align: "center",
         render: (_, record) => {
           const isRowLoading = actionLoadingId === record._id;
           return (
-            <Space size={6}>
+            <Space size={4} className="justify-center">
               <Button
-                type="primary"
                 size="small"
                 icon={<UndoOutlined className="text-xs" />}
                 loading={isRowLoading}
                 onClick={() => handleRestore(record._id)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white border-none font-bold text-xs h-7 px-2.5 rounded-md transition-colors"
-                title="Khôi phục phiếu"
-                aria-label="Khôi phục phiếu sửa chữa"
+                className="trash-btn-emerald w-7 h-7 rounded-lg flex items-center justify-center p-0 border-none transition-transform active:scale-95 shadow-xs"
+                title="Khôi phục"
+                aria-label="Khôi phục phiếu"
               />
 
               <Popconfirm
                 title="Xóa vĩnh viễn phiếu này?"
-                description="Hành động này không thể hoàn tác và sẽ xóa hoàn toàn khỏi cơ sở dữ liệu."
+                description="Hành động này không thể hoàn tác."
                 okText="Xóa luôn"
                 cancelText="Hủy"
                 okButtonProps={{ danger: true, loading: isRowLoading }}
                 onConfirm={() => handlePermanentDelete(record._id)}
               >
                 <Button
-                  type="primary"
-                  danger
                   size="small"
                   icon={<DeleteOutlined className="text-xs" />}
                   loading={isRowLoading}
-                  className="bg-red-600 hover:bg-red-700 text-white border-none font-bold text-xs h-7 px-2 rounded-md transition-colors"
+                  className="trash-btn-red-outline w-7 h-7 rounded-lg flex items-center justify-center p-0 transition-transform active:scale-95 shadow-xs"
                   title="Xóa vĩnh viễn"
-                  aria-label="Xóa vĩnh viễn phiếu sửa chữa"
+                  aria-label="Xóa vĩnh viễn phiếu"
                 />
               </Popconfirm>
             </Space>
@@ -195,24 +194,26 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onClose }) => {
       }
       open={open}
       onCancel={onClose}
+      centered
       footer={[
-        <Button key="close" onClick={onClose} size="small" className="font-bold text-xs px-4">
+        <Button key="close" onClick={onClose} size="small" className="font-bold text-xs px-4 rounded-lg">
           Đóng
         </Button>,
       ]}
       width={780}
       className="custom-trash-modal"
-      styles={{ body: { paddingTop: 12, paddingBottom: 12 } }}
+      styles={{ body: { paddingTop: 10, paddingBottom: 10 } }}
     >
-      <div className="text-xs text-gray-600 dark:text-gray-300 mb-4 bg-amber-50 dark:bg-amber-950/40 p-3 rounded-lg border border-amber-200 dark:border-amber-800/80 leading-relaxed">
+      <div className="text-[11px] text-gray-600 dark:text-gray-300 mb-3.5 bg-amber-50 dark:bg-amber-950/40 p-3 rounded-xl border border-amber-200 dark:border-amber-800/80 leading-relaxed">
         📌 Các phiếu sửa chữa bị xóa sẽ lưu tạm tại đây và <strong>tự động xóa vĩnh viễn khỏi cơ sở dữ liệu sau 30 ngày</strong>. Bạn có thể khôi phục bất kỳ lúc nào trước khi hết hạn.
       </div>
 
       {trashOrders.length > 0 && (
         <div className="flex items-center justify-between gap-2 mb-3 px-1">
-          <span className="text-xs text-gray-500 font-semibold">
-            Tổng cộng: <strong className="text-gray-800 dark:text-gray-200">{trashOrders.length}</strong> phiếu đã xóa
-          </span>
+          <div className="text-xs text-gray-500 font-semibold leading-tight">
+            <span>Tổng cộng: <strong className="text-gray-900 dark:text-gray-100 font-extrabold">{trashOrders.length}</strong> phiếu</span>
+            <div className="text-[11px] text-gray-500">đã xóa</div>
+          </div>
           <div className="flex items-center gap-2">
             <Popconfirm
               title="Khôi phục tất cả phiếu sửa chữa trong thùng rác?"
@@ -221,11 +222,10 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onClose }) => {
               cancelText="Hủy"
             >
               <Button
-                type="primary"
                 size="small"
                 icon={<UndoOutlined className="text-xs" />}
                 loading={isRestoringAll}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white border-none font-bold text-xs h-7 px-3 rounded-md transition-colors"
+                className="trash-btn-emerald font-bold text-xs h-8 px-3 rounded-lg flex items-center gap-1.5 border-none shadow-xs"
               >
                 Khôi phục tất cả
               </Button>
@@ -240,12 +240,10 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onClose }) => {
               onConfirm={handlePermanentDeleteAll}
             >
               <Button
-                type="primary"
-                danger
                 size="small"
                 icon={<DeleteOutlined className="text-xs" />}
                 loading={isDeletingAll}
-                className="bg-red-600 hover:bg-red-700 text-white border-none font-bold text-xs h-7 px-3 rounded-md transition-colors"
+                className="trash-btn-red font-bold text-xs h-8 px-3 rounded-lg flex items-center gap-1.5 border-none shadow-xs"
               >
                 Xóa tất cả
               </Button>
@@ -255,20 +253,20 @@ export const TrashModal: React.FC<TrashModalProps> = ({ open, onClose }) => {
       )}
 
       {isLoading || isFetching ? (
-        <div className="py-10 text-center">
-          <Spin size="small" tip="Đang tải danh sách thùng rác..." />
+        <div className="py-8 text-center">
+          <Spin size="small" tip="Đang tải danh sách..." />
         </div>
       ) : trashOrders.length === 0 ? (
-        <Empty description={<span className="text-xs font-semibold text-gray-500">Thùng rác trống. Không có phiếu sửa chữa nào bị xóa.</span>} className="py-8" />
+        <Empty description={<span className="text-xs font-semibold text-gray-500">Thùng rác trống.</span>} className="py-6" />
       ) : (
-        <div className="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg shadow-xs w-full">
+        <div className="border border-gray-200 dark:border-gray-800 rounded-lg shadow-xs w-full overflow-hidden">
           <Table
             columns={columns}
             dataSource={trashOrders}
             rowKey="_id"
             pagination={{ pageSize: 6, size: "small" }}
             size="small"
-            className="custom-compact-trash-table text-xs w-full"
+            className="custom-compact-trash-table text-[10px] w-full"
           />
         </div>
       )}

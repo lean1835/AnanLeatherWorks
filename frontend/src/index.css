@@ -133,6 +133,98 @@
   border-color: #6f4627 !important;
 }
 
+/* Explicit Trash Modal Button Color Overrides */
+.trash-btn-emerald.ant-btn,
+.trash-btn-emerald.ant-btn-primary {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+.trash-btn-emerald.ant-btn:hover,
+.trash-btn-emerald.ant-btn-primary:hover,
+.trash-btn-emerald.ant-btn:focus,
+.trash-btn-emerald.ant-btn-primary:focus {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+.trash-btn-red.ant-btn,
+.trash-btn-red.ant-btn-primary {
+  background-color: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+.trash-btn-red.ant-btn:hover,
+.trash-btn-red.ant-btn-primary:hover,
+.trash-btn-red.ant-btn:focus,
+.trash-btn-red.ant-btn-primary:focus {
+  background-color: #dc2626 !important;
+  border-color: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+.trash-btn-red-outline.ant-btn {
+  background-color: #ffffff !important;
+  border: 1px solid #ef4444 !important;
+  color: #ef4444 !important;
+}
+.trash-btn-red-outline.ant-btn:hover,
+.trash-btn-red-outline.ant-btn:focus {
+  background-color: #fef2f2 !important;
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
+}
+
+.dark .trash-btn-red-outline.ant-btn {
+  background-color: #1f2937 !important;
+  border: 1px solid #ef4444 !important;
+  color: #f87171 !important;
+}
+
+/* Trash Modal Mobile & Compact Table Styles */
+.custom-trash-modal .ant-modal-content {
+  padding: 18px 16px !important;
+  border-radius: 20px !important;
+}
+
+@media (max-width: 640px) {
+  .custom-trash-modal {
+    max-width: 95vw !important;
+    width: 95vw !important;
+    margin: auto !important;
+    padding-bottom: 0 !important;
+  }
+  .custom-trash-modal .ant-modal-content {
+    padding: 14px 10px !important;
+  }
+}
+
+.custom-compact-trash-table .ant-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+.custom-compact-trash-table .ant-table-thead > tr > th {
+  padding: 8px 4px !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+  font-weight: 700 !important;
+  color: #374151 !important;
+  background: #f9fafb !important;
+}
+
+.dark .custom-compact-trash-table .ant-table-thead > tr > th {
+  background: #1f2937 !important;
+  color: #d1d5db !important;
+}
+
+.custom-compact-trash-table .ant-table-tbody > tr > td {
+  padding: 8px 4px !important;
+  font-size: 11px !important;
+  line-height: 1.3 !important;
+}
+
 /* Premium Notification */
 .premium-notification {
   border-radius: 16px !important;
